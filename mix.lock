@@ -1,0 +1,3 @@
+%{
+  "structure": {:hex, :structure, "0.2.2", "7ef81ba794da92ff74f0d20c7c662e0fe89461c5d40296e20ca199c6f472375c", [:mix], [], "hexpm", "eadddcce81a73958bcd1a713551f4ede454aca7c2eafdc74fd66bd7e90ea3f35"},
+}
