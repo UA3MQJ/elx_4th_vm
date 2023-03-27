@@ -1,3 +1,11 @@
+defmodule WordHeader do
+  # addres адрес
+  # immediate дает указание интерпретатору, что слово должно быть
+  # выполнено в режиме программирования, а не записано в память
+  defstruct address: 0,
+            immediate: false # флаг немедленной интерпретации.
+end
+
 defmodule E4vm do
   @moduledoc """
   Documentation for `E4vm`.
@@ -7,23 +15,46 @@ defmodule E4vm do
             ds: Structure.Stack.new(), # Стек данных
             ip: 0,                     # Указатель инструкций
             wp: 0,                     # Указатель слова
-            primitives: %{}            # хранилище примитивов
+            core: [],                  # Base instructions
+            entries: [],               # Word header dictionary
+            hereP: 0                   # Here pointer
 
 
   alias Structure.Stack
 
-  @next    0
-  @do_list 1
-  @exit    2
-
   def new() do
-    primitives = %{
-      @next    => {E4vm, :next},
-      @do_list => {E4vm, :do_list},
-      @exit    => {E4vm, :exit}
-    }
 
-    %E4vm{primitives: primitives}
+    %E4vm{}
+    |> add_core_word("nop",    {E4vm, :nop},     false)
+    |> add_core_word("next",   {E4vm, :next},    false)
+    |> add_core_word("doList", {E4vm, :do_list}, false)
+    |> add_core_word("exit",   {E4vm, :exit},    false)
+    |> add_core_word("hello",  {E4vm, :hello},   false)
+  end
+
+  def add_core_word(%E4vm{} = vm, word, handler, immediate) do
+    address = length(vm.core)
+    new_core = [handler] ++ vm.core
+
+    vm
+    |> Map.merge(%{core: new_core})
+    |> define(word, handler, immediate)
+    |> add_address_to_mem(address)
+    |> inc_here()
+  end
+
+  defp define(%E4vm{} = vm, word, entry, immediate) do
+    entry = {word, {entry, immediate}}
+    %E4vm{vm| entries: [entry] ++ vm.entries}
+  end
+
+  defp add_address_to_mem(%E4vm{} = vm, address) do
+    new_mem = Map.merge(vm.mem, %{address => address})
+    %E4vm{vm| mem: new_mem}
+  end
+
+  defp inc_here(%E4vm{} = vm) do
+    %E4vm{vm| hereP: vm.hereP + 1}
   end
 
   # Останавливаемся, если адрес 0
@@ -47,8 +78,11 @@ defmodule E4vm do
     # по адресу следующего указателя на слово
     # выбираем адрес инструкции из памяти
     # и по адресу определяем команду с помощью хранилища примитовов
-    {m, f} = new_vm.primitives[new_vm.mem[new_vm.wp]]
-      |> IO.inspect(label: ">>>>>>>>>>>> next execute")
+    # next_wp |> IO.inspect(label: ">>>>>>>>>>>> next next_wp")
+    # new_vm.mem[next_wp] |> IO.inspect(label: ">>>>>>>>>>>> next mem[next_wp]")
+
+    {m, f} = Enum.at(vm.core, length(vm.core)-(new_vm.mem[next_wp])-1)
+      # |> IO.inspect(label: ">>>>>>>>>>>> next execute")
 
     # выполняем эту команду
     next_new_vm = apply(m, f, [new_vm])
@@ -77,5 +111,18 @@ defmodule E4vm do
     {:ok, next_rs} = Stack.pop(vm.rs)
 
     %E4vm{vm | ip: next_ip, rs: next_rs}
+  end
+
+  def nop(vm) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> nop    ")
+    vm
+  end
+
+  def hello(vm) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
+
+    IO.puts("Hello")
+
+    vm
   end
 end
