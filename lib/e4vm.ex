@@ -178,4 +178,9 @@ defmodule E4vm do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->wp")
     %E4vm{vm | wp: vm.hereP}
   end
+
+  def here_to_ip(vm) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->ip")
+    %E4vm{vm | ip: vm.hereP}
+  end
 end

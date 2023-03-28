@@ -45,10 +45,27 @@ defmodule E4vmTest do
     vm = E4vm.new()
       |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
       |> E4vm.here_to_wp()
-      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("hello2")
+      |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("halt")
       |> E4vm.do_list()
+      |> E4vm.next()
+      |> IO.inspect(label: ">>>> vm")
+
+    assert_receive :hello
+  end
+
+  test "more more simple start test" do
+    Process.register(self(), :test_proc)
+
+    vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.here_to_ip()
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("hello2")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("halt")
       |> E4vm.next()
 
     assert_receive :hello
@@ -56,14 +73,12 @@ defmodule E4vmTest do
 
   test "test doLit" do
     vm = E4vm.new()
-      |> E4vm.here_to_wp()
+      |> E4vm.here_to_ip()
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("doLit")
       |> E4vm.add_op(555)
       |> E4vm.add_op_from_string("halt")
-      |> E4vm.do_list()
       |> E4vm.next()
-      |> IO.inspect(label: ">>>> vm")
 
     assert {:ok, 555} = Stack.head(vm.ds)
   end
