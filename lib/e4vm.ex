@@ -15,7 +15,7 @@ defmodule E4vm do
             ds: Structure.Stack.new(), # Стек данных
             ip: 0,                     # Указатель инструкций
             wp: 0,                     # Указатель слова
-            core: [],                  # Base instructions
+            core: %{},                 # Base instructions
             entries: [],               # Word header dictionary
             hereP: 0                   # Here pointer
 
@@ -33,8 +33,9 @@ defmodule E4vm do
   end
 
   def add_core_word(%E4vm{} = vm, word, handler, immediate) do
-    address = length(vm.core)
-    new_core = [handler] ++ vm.core
+    address = vm.hereP
+    # new_core = [handler] ++ vm.core
+    new_core = Map.merge(vm.core, %{vm.hereP => handler})
 
     vm
     |> Map.merge(%{core: new_core})
@@ -55,6 +56,30 @@ defmodule E4vm do
 
   defp inc_here(%E4vm{} = vm) do
     %E4vm{vm| hereP: vm.hereP + 1}
+  end
+
+  # lookup - поиск слова и адреса слова
+  def look_up_word(%E4vm{} = vm, word) do
+    case :proplists.get_value(word, vm.entries) do
+      :undefined -> :undefined
+      {{_m, _f} = word, _immediate} -> word
+    end
+  end
+
+  def look_up_word_address(%E4vm{} = vm, word) do
+    case look_up_word(vm, word) do
+      :undefined -> :undefined
+      {_m, _f} = word ->
+        vm.core
+          |> Enum.find(fn {_key, val} -> val == word end)
+          |> elem(0)
+    end
+  end
+
+  # добавляем операцию в память. то есть в here кладем  адрес слова
+  def add_op(%E4vm{} = vm, addr) do
+    new_mem = Map.merge(vm.mem, %{vm.hereP => addr})
+    %E4vm{vm| hereP: vm.hereP + 1, mem: new_mem}
   end
 
   # Останавливаемся, если адрес 0
@@ -81,7 +106,8 @@ defmodule E4vm do
     # next_wp |> IO.inspect(label: ">>>>>>>>>>>> next next_wp")
     # new_vm.mem[next_wp] |> IO.inspect(label: ">>>>>>>>>>>> next mem[next_wp]")
 
-    {m, f} = Enum.at(vm.core, length(vm.core)-(new_vm.mem[next_wp])-1)
+    # {m, f} = Enum.at(vm.core, length(vm.core)-(new_vm.mem[next_wp])-1)
+    {m, f} = vm.core[new_vm.mem[next_wp]]
       # |> IO.inspect(label: ">>>>>>>>>>>> next execute")
 
     # выполняем эту команду
