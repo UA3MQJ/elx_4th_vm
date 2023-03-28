@@ -65,7 +65,7 @@ defmodule E4vmTest do
       |> E4vm.next()
       |> IO.inspect(label: ">>>> vm")
 
-    assert Stack.pop(vm.ds) == 555
+    assert {:ok, 555} = Stack.head(vm.ds)
   end
 
   def hello(vm) do
