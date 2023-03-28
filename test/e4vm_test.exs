@@ -1,5 +1,6 @@
 defmodule E4vmTest do
   use ExUnit.Case
+  alias Structure.Stack
   doctest E4vm
 
   test "greets the world new" do
@@ -35,10 +36,37 @@ defmodule E4vmTest do
       |> E4vm.do_list() # выполняем команду начала интерпретации слова, сохраняя IP = 0 на стеке возвратов
       |> E4vm.next()    # запускаем адресный интерпретатор
 
+    assert_receive :hello
+  end
+
+  test "more simple start test" do
+    Process.register(self(), :test_proc)
+
+    vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("hello2")
+      |> E4vm.add_op_from_string("halt")
+      |> E4vm.do_list()
+      |> E4vm.next()
 
     assert_receive :hello
   end
 
+  test "test doLit" do
+    vm = E4vm.new()
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("doLit")
+      |> E4vm.add_op(555)
+      |> E4vm.add_op_from_string("halt")
+      |> E4vm.do_list()
+      |> E4vm.next()
+      |> IO.inspect(label: ">>>> vm")
+
+    assert Stack.pop(vm.ds) == 555
+  end
 
   def hello(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")

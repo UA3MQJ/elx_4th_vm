@@ -25,11 +25,14 @@ defmodule E4vm do
   def new() do
 
     %E4vm{}
+    # core
     |> add_core_word("nop",    {E4vm, :nop},     false)
+    |> add_core_word("halt",   {E4vm, :halt},    false)
     |> add_core_word("next",   {E4vm, :next},    false)
     |> add_core_word("doList", {E4vm, :do_list}, false)
     |> add_core_word("exit",   {E4vm, :exit},    false)
-    |> add_core_word("hello",  {E4vm, :hello},   false)
+    # execute
+    |> add_core_word("doLit",  {E4vm, :do_lit},  false)
   end
 
   def add_core_word(%E4vm{} = vm, word, handler, immediate) do
@@ -82,6 +85,13 @@ defmodule E4vm do
     %E4vm{vm| hereP: vm.hereP + 1, mem: new_mem}
   end
 
+  # это больше нужно для pipe'ов потому что вложенную фунцию в пайпе не вызвать с входными данными (или можно?)
+  def add_op_from_string(%E4vm{} = vm, word) do
+    addr = look_up_word_address(vm, word)
+    new_mem = Map.merge(vm.mem, %{vm.hereP => addr})
+    %E4vm{vm| hereP: vm.hereP + 1, mem: new_mem}
+  end
+
   # Останавливаемся, если адрес 0
   def next(%E4vm{ip: 0} = vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next ok")
@@ -112,6 +122,7 @@ defmodule E4vm do
 
     # выполняем эту команду
     next_new_vm = apply(m, f, [new_vm])
+      # |> IO.inspect(label: ">>>>>>>>>>>> next next_new_vm")
 
     next(next_new_vm)
   end
@@ -139,16 +150,32 @@ defmodule E4vm do
     %E4vm{vm | ip: next_ip, rs: next_rs}
   end
 
+  # нет операции
   def nop(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> nop    ")
     vm
   end
 
-  def hello(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
+  # остановка
+  def halt(vm) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> halt   ")
+    %E4vm{vm | ip: 0}
+  end
 
-    IO.puts("Hello")
+  # Чтобы при интерпретации отличить числовую константу от адреса слова,
+  # при компиляции перед каждой константой компилируется вызов слова doLit,
+  # которое считывает следующее значение в памяти и размещает его на стеке данных.
+  def do_lit(vm) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> do_lit ")
+    next_ds = Stack.push(vm.ds, vm.mem[vm.ip])
+    next_ip = vm.ip + 1
 
-    vm
+    %E4vm{vm | ip: next_ip, ds: next_ds}
+  end
+
+  # сохранить текущее here в wp чтобы это место считать стартовым для программы
+  def here_to_wp(vm) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->wp")
+    %E4vm{vm | wp: vm.hereP}
   end
 end
