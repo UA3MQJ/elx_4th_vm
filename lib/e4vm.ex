@@ -27,7 +27,6 @@ defmodule E4vm do
     %E4vm{}
     # core
     |> add_core_word("nop",    {E4vm, :nop},     false)
-    |> add_core_word("halt",   {E4vm, :halt},    false)
     |> add_core_word("next",   {E4vm, :next},    false)
     |> add_core_word("doList", {E4vm, :do_list}, false)
     |> add_core_word("exit",   {E4vm, :exit},    false)
@@ -94,7 +93,7 @@ defmodule E4vm do
 
   # Останавливаемся, если адрес 0
   def next(%E4vm{ip: 0} = vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next ok")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next ok")
 
     vm
   end
@@ -102,7 +101,7 @@ defmodule E4vm do
   # Суть интерпретации заключается в переходе по адресу в памяти и в исполнении инструкции, которая там указана.
   def next(vm) do
     # vm |> IO.inspect(label: ">>>>>>>>>>>> next")
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next   ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next   ")
 
     # выбираем адрес следующей инструкции
     next_wp = vm.mem[vm.ip]
@@ -154,12 +153,6 @@ defmodule E4vm do
   def nop(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> nop    ")
     vm
-  end
-
-  # остановка
-  def halt(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> halt   ")
-    %E4vm{vm | ip: 0}
   end
 
   # Чтобы при интерпретации отличить числовую константу от адреса слова,

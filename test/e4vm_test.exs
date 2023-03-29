@@ -1,7 +1,23 @@
 defmodule E4vmTest do
   use ExUnit.Case
+  alias ElixirLS.LanguageServer.Server.InvalidParamError
   alias Structure.Stack
   doctest E4vm
+
+
+  # - последовательность команд в памяти, начинающаяся с какого-то адреса - это пользовательское слово.
+  # - пользовательское слово должно начинаться с doList (IP -> RS, WP+1 -> IP)
+  # - пользовательское слово заканчивается на exit (RS -> IP)
+
+  # - вызов пользовательского слова из другого слова - это просто адрес
+
+  # - запуск и остановка машины
+  # - перед запуском с произвольного адреса, нужно выполнить 2 действия
+  # - поместить 0 -> IP и стартовый_адрес -> WP
+  # - выполнить команду doList которая поместит 0 в стек возвратов RS и поместит стартовый адрес в IP
+  #   0 в стеке возвратов при выполнении exit в конце слова поместит обратно 0 -> IP
+  #   и следующий next остановит машину потому что достигнем IP=0
+  # - выполнить команду next, которая начнет последовательно выполнять слова вызывая саму себя в цикле
 
   test "greets the world new" do
     Process.register(self(), :test_proc)
@@ -45,27 +61,39 @@ defmodule E4vmTest do
     vm = E4vm.new()
       |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
       |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("hello2")
       |> E4vm.add_op_from_string("nop")
-      |> E4vm.add_op_from_string("halt")
+      |> E4vm.add_op_from_string("exit")
       |> E4vm.do_list()
       |> E4vm.next()
-      |> IO.inspect(label: ">>>> vm")
+      # |> IO.inspect(label: ">>>> vm")
 
     assert_receive :hello
   end
 
-  test "more more simple start test" do
+
+  test "more call/return simple start test" do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
       |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
-      |> E4vm.here_to_ip()
+      |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("hello2")
       |> E4vm.add_op_from_string("nop")
-      |> E4vm.add_op_from_string("halt")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op(6)
+      |> E4vm.add_op_from_string("exit")
+      # |> IO.inspect(label: ">>>> vm")
+      |> E4vm.do_list()
       |> E4vm.next()
 
     assert_receive :hello
@@ -73,12 +101,14 @@ defmodule E4vmTest do
 
   test "test doLit" do
     vm = E4vm.new()
-      |> E4vm.here_to_ip()
+      |> E4vm.here_to_wp()
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("doLit")
       |> E4vm.add_op(555)
-      |> E4vm.add_op_from_string("halt")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.do_list()
       |> E4vm.next()
+      # |> IO.inspect(label: ">>>> vm")
 
     assert {:ok, 555} = Stack.head(vm.ds)
   end
