@@ -20,18 +20,29 @@ defmodule E4vm do
             hereP: 0                   # Here pointer
 
 
-  alias Structure.Stack
-
   def new() do
 
     %E4vm{}
     # core
-    |> add_core_word("nop",    {E4vm, :nop},     false)
-    |> add_core_word("next",   {E4vm, :next},    false)
-    |> add_core_word("doList", {E4vm, :do_list}, false)
-    |> add_core_word("exit",   {E4vm, :exit},    false)
-    # execute
-    |> add_core_word("doLit",  {E4vm, :do_lit},  false)
+    |> add_core_word("nop",       {E4vm.Words.Core, :nop},            false)
+    |> add_core_word("next",      {E4vm.Words.Core, :next},           false)
+    |> add_core_word("doList",    {E4vm.Words.Core, :do_list},        false)
+    |> add_core_word("exit",      {E4vm.Words.Core, :exit},           false)
+    |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
+    |> add_core_word("doLit",     {E4vm.Words.Core, :do_lit},         false)
+    |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false) # TODO
+    |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)  # TODO
+    |> add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
+    |> add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false) # TODO
+    |> add_core_word("here",      {E4vm.Words.Core, :get_here_addr},  false) # TODO
+    |> add_core_word("quit",      {E4vm.Words.Core, :quit},           false) # TODO
+    |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false) # TODO
+    |> add_core_word("words",     {E4vm.Words.Core, :words},          false) # TODO
+    |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO
+    |> add_core_word(",",         {E4vm.Words.Core, :comma},          false) # TODO
+    |> add_core_word("[",         {E4vm.Words.Core, :lbrac},          true)  # TODO
+    |> add_core_word("]",         {E4vm.Words.Core, :rbrac},          false) # TODO
+    |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)  # TODO
   end
 
   def add_core_word(%E4vm{} = vm, word, handler, immediate) do
@@ -91,81 +102,6 @@ defmodule E4vm do
     %E4vm{vm| hereP: vm.hereP + 1, mem: new_mem}
   end
 
-  # Останавливаемся, если адрес 0
-  def next(%E4vm{ip: 0} = vm) do
-    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next ok")
-
-    vm
-  end
-
-  # Суть интерпретации заключается в переходе по адресу в памяти и в исполнении инструкции, которая там указана.
-  def next(vm) do
-    # vm |> IO.inspect(label: ">>>>>>>>>>>> next")
-    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next   ")
-
-    # выбираем адрес следующей инструкции
-    next_wp = vm.mem[vm.ip]
-    # увеличиваем указатель инструкций
-    next_ip = vm.ip + 1
-    new_vm = %E4vm{vm | ip: next_ip, wp: next_wp}
-
-    # по адресу следующего указателя на слово
-    # выбираем адрес инструкции из памяти
-    # и по адресу определяем команду с помощью хранилища примитовов
-    # next_wp |> IO.inspect(label: ">>>>>>>>>>>> next next_wp")
-    # new_vm.mem[next_wp] |> IO.inspect(label: ">>>>>>>>>>>> next mem[next_wp]")
-
-    # {m, f} = Enum.at(vm.core, length(vm.core)-(new_vm.mem[next_wp])-1)
-    {m, f} = vm.core[new_vm.mem[next_wp]]
-      # |> IO.inspect(label: ">>>>>>>>>>>> next execute")
-
-    # выполняем эту команду
-    next_new_vm = apply(m, f, [new_vm])
-      # |> IO.inspect(label: ">>>>>>>>>>>> next next_new_vm")
-
-    next(next_new_vm)
-  end
-
-  # Каждое пользовательское слово начинается с команды DoList,
-  # задача которой — сохранить текущий адрес интерпретации на стеке
-  # и установить адрес интерпретации следующего слова.
-  def do_list(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> do_list")
-
-    next_rs = Stack.push(vm.rs, vm.ip)
-    next_ip = vm.wp + 1
-
-    %E4vm{vm | ip: next_ip, rs: next_rs}
-  end
-
-  # команда для выхода из слова
-  # восстанавливает адрес указателя инструкций IP со стека возвратов RS
-  def exit(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> exit   ")
-
-    {:ok, next_ip} = Stack.head(vm.rs)
-    {:ok, next_rs} = Stack.pop(vm.rs)
-
-    %E4vm{vm | ip: next_ip, rs: next_rs}
-  end
-
-  # нет операции
-  def nop(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> nop    ")
-    vm
-  end
-
-  # Чтобы при интерпретации отличить числовую константу от адреса слова,
-  # при компиляции перед каждой константой компилируется вызов слова doLit,
-  # которое считывает следующее значение в памяти и размещает его на стеке данных.
-  def do_lit(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> do_lit ")
-    next_ds = Stack.push(vm.ds, vm.mem[vm.ip])
-    next_ip = vm.ip + 1
-
-    %E4vm{vm | ip: next_ip, ds: next_ds}
-  end
-
   # сохранить текущее here в wp чтобы это место считать стартовым для программы
   def here_to_wp(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->wp")
@@ -175,5 +111,22 @@ defmodule E4vm do
   def here_to_ip(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->ip")
     %E4vm{vm | ip: vm.hereP}
+  end
+
+  def inspect_core(%E4vm{} = vm) do
+    "Core:\r\n" <>
+    "ip:#{vm.ip} wp:#{vm.wp} hereP:#{vm.hereP}\r\n" <>
+    "ds: #{inspect vm.ds} rs: #{inspect vm.rs}\r\nMem:"
+    |> IO.puts()
+
+    vm.mem
+    |> Map.keys()
+    |> Enum.sort()
+    |> Enum.map(fn(k) ->
+      "#{k}:#{vm.mem[k]} (#{inspect vm.core[vm.mem[k]]})" |> IO.puts()
+    end)
+
+    # vm
+    # |> IO.inspect()
   end
 end

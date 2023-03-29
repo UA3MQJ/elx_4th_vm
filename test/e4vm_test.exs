@@ -48,9 +48,9 @@ defmodule E4vmTest do
       # <- hereP
 
     vm = %E4vm{vm | ip: 0, wp: vm.hereP - 3}
-      |> IO.inspect(label: ">>>> vm")
-      |> E4vm.do_list() # выполняем команду начала интерпретации слова, сохраняя IP = 0 на стеке возвратов
-      |> E4vm.next()    # запускаем адресный интерпретатор
+      # |> IO.inspect(label: ">>>> vm")
+      |> E4vm.Words.Core.do_list() # выполняем команду начала интерпретации слова, сохраняя IP = 0 на стеке возвратов
+      |> E4vm.Words.Core.next()    # запускаем адресный интерпретатор
 
     assert_receive :hello
   end
@@ -66,8 +66,8 @@ defmodule E4vmTest do
       |> E4vm.add_op_from_string("hello2")
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.do_list()
-      |> E4vm.next()
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
       # |> IO.inspect(label: ">>>> vm")
 
     assert_receive :hello
@@ -79,6 +79,10 @@ defmodule E4vmTest do
 
     vm = E4vm.new()
       |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+
+    sub_word_address = vm.hereP
+
+    vm
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("hello2")
@@ -90,11 +94,12 @@ defmodule E4vmTest do
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("nop")
-      |> E4vm.add_op(6)
+      |> E4vm.add_op(sub_word_address)
+      |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("exit")
       # |> IO.inspect(label: ">>>> vm")
-      |> E4vm.do_list()
-      |> E4vm.next()
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
 
     assert_receive :hello
   end
@@ -106,11 +111,118 @@ defmodule E4vmTest do
       |> E4vm.add_op_from_string("doLit")
       |> E4vm.add_op(555)
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.do_list()
-      |> E4vm.next()
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
       # |> IO.inspect(label: ">>>> vm")
 
     assert {:ok, 555} = Stack.head(vm.ds)
+  end
+
+  test "test branch" do
+    Process.register(self(), :test_proc)
+
+    vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.here_to_wp()
+
+    start_addr = vm.hereP
+
+    vm = vm
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("branch")
+
+    jmp_address = vm.hereP
+
+    vm
+      |> E4vm.add_op(jmp_address + 4)      # перепрыгнет через hello2. а если +2 перепрыгнет на hello2
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("hello2")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      # |> IO.inspect(label: ">>>> vm")
+
+    refute_receive :hello
+
+    vm
+      |> E4vm.add_op(jmp_address + 2)      # перепрыгнет через hello2. а если +2 перепрыгнет на hello2
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("hello2")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      # |> IO.inspect(label: ">>>> vm")
+
+    assert_receive :hello
+  end
+
+  test "test zbranch" do
+    Process.register(self(), :test_proc)
+
+    vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.here_to_wp()
+
+    start_addr = vm.hereP
+
+    vm = vm
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("0branch")
+      |> Map.merge(%{ds: Stack.push(vm.ds, 0)})
+
+    jmp_address = vm.hereP
+
+    vm
+      |> E4vm.add_op(jmp_address + 4)      # перепрыгнет через hello2
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("hello2")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      # |> IO.inspect(label: ">>>> vm")
+
+    refute_receive :hello
+
+    # -------------
+    IO.puts("\r\n")
+
+    vm = E4vm.new()
+    |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+    |> E4vm.here_to_wp()
+
+    start_addr = vm.hereP
+
+    vm = vm
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("0branch")
+      |> Map.merge(%{ds: Stack.push(vm.ds, 1)})
+
+    jmp_address = vm.hereP
+
+    vm
+      |> E4vm.add_op(jmp_address + 4)      # не перепрыгнет через hello2
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("hello2")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("nop")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      # |> E4vm.inspect_core()
+
+    assert_receive :hello
+
   end
 
   def hello(vm) do
