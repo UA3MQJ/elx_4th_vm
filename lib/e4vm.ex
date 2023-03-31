@@ -35,9 +35,9 @@ defmodule E4vm do
     |> add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
     |> add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false)
     |> add_core_word("here",      {E4vm.Words.Core, :get_here_addr},  false)
-    |> add_core_word("quit",      {E4vm.Words.Core, :quit},           false) # TODO
+    |> add_core_word("quit",      {E4vm.Words.Core, :quit},           false)
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false) # TODO
-    |> add_core_word("words",     {E4vm.Words.Core, :words},          false) # TODO
+    |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
     |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO
     |> add_core_word(",",         {E4vm.Words.Core, :comma},          false) # TODO
     |> add_core_word("[",         {E4vm.Words.Core, :lbrac},          true)  # TODO

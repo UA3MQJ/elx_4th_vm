@@ -144,6 +144,14 @@ defmodule E4vm.Words.Core do
 
   def words(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> words   ")
+
+    words = vm.entries
+      |> :lists.reverse()
+      |> Enum.map(fn({word, {{_, _}, _}}) -> word end)
+      |> Enum.join(" ")
+      |> IO.inspect(label: ">>>>>>>>>>>> vm   ")
+
+    IO.puts("\r\n#{words}\r\n")
     vm
   end
 
