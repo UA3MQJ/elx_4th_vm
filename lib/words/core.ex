@@ -139,7 +139,29 @@ defmodule E4vm.Words.Core do
 
   def dump(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> dump    ")
-    vm
+
+    {:ok, size} = Stack.head(vm.ds)
+    {:ok, next_ds} = Stack.pop(vm.ds)
+
+    {:ok, start_addr} = Stack.head(next_ds)
+    {:ok, next_next_ds} = Stack.pop(next_ds)
+
+    IO.puts("\r\n-----  MEMORY DUMP from addr=#{start_addr} size=#{size} -----\r\n")
+    Enum.each(start_addr..start_addr+size, fn(addr) ->
+      addr_str = addr
+        |> Integer.to_string(16)
+        |> String.pad_leading(4, "0")
+      data_str = case vm.mem[addr] do
+        nil -> 'XX'
+        data ->
+          Integer.to_string(data, 16)
+          |> String.pad_leading(2, "0")
+      end
+
+      IO.puts("0x#{addr_str}:#{data_str}")
+    end)
+
+    %E4vm{vm | ds: next_next_ds}
   end
 
   def words(vm) do
