@@ -25,17 +25,17 @@ defmodule E4vm do
     %E4vm{}
     # core
     |> add_core_word("nop",       {E4vm.Words.Core, :nop},            false)
+    |> add_core_word("exit",      {E4vm.Words.Core, :exit},           false)
+    |> add_core_word("quit",      {E4vm.Words.Core, :quit},           false)
     |> add_core_word("next",      {E4vm.Words.Core, :next},           false)
     |> add_core_word("doList",    {E4vm.Words.Core, :do_list},        false)
-    |> add_core_word("exit",      {E4vm.Words.Core, :exit},           false)
-    |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
     |> add_core_word("doLit",     {E4vm.Words.Core, :do_lit},         false)
+    |> add_core_word("here",      {E4vm.Words.Core, :get_here_addr},  false)
+    |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
     |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false) # TODO
     |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)  # TODO
     |> add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
     |> add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false)
-    |> add_core_word("here",      {E4vm.Words.Core, :get_here_addr},  false)
-    |> add_core_word("quit",      {E4vm.Words.Core, :quit},           false)
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
     |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
     |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO
