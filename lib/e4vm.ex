@@ -126,8 +126,6 @@ defmodule E4vm do
       "#{k}:#{vm.mem[k]} (#{inspect vm.core[vm.mem[k]]})" |> IO.puts()
     end)
 
-    # vm
-    # |> IO.inspect()
     vm
   end
 end

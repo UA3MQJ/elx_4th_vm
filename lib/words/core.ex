@@ -133,6 +133,7 @@ defmodule E4vm.Words.Core do
 
   def quit(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> quit    ")
+    :erlang.halt()
     vm
   end
 
