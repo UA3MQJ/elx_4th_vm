@@ -124,8 +124,11 @@ defmodule E4vm.Words.Core do
   end
 
   def get_here_addr(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here    ")
-    vm
+    "ip:#{vm.ip} wp:#{vm.wp} here:#{vm.hereP}" |> IO.inspect(label: ">>>>>>>>>>>> here    ")
+    # DS.Push(_hereP);
+    next_ds = Stack.push(vm.ds, vm.hereP)
+
+    %E4vm{vm | ds: next_ds}
   end
 
   def quit(vm) do

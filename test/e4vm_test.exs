@@ -225,6 +225,20 @@ defmodule E4vmTest do
 
   end
 
+  test "test here" do
+    vm = E4vm.new()
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("here")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      |> E4vm.inspect_core()
+
+    {:ok, top_ds} = Stack.head(vm.ds)
+    assert vm.hereP == top_ds
+  end
+
   def hello(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
 
