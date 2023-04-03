@@ -233,7 +233,7 @@ defmodule E4vmTest do
       |> E4vm.add_op_from_string("exit")
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
-      |> E4vm.inspect_core()
+      # |> E4vm.inspect_core()
 
     {:ok, top_ds} = Stack.head(vm.ds)
     assert vm.hereP == top_ds
@@ -283,12 +283,10 @@ defmodule E4vmTest do
     vm = vm
       |> Map.merge(%{ds: Stack.push(vm.ds, 0)})
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.inspect_core()
 
     vm = vm
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
-      |> E4vm.inspect_core()
 
     assert vm.mem[vm.hereP - 1] == 0
   end
@@ -308,7 +306,6 @@ defmodule E4vmTest do
       |> E4vm.add_op_from_string("exit")
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
-      |> E4vm.inspect_core()
 
     assert {"hello2", {{E4vmTest, :hello}, true}} = hd(vm.entries)
   end
