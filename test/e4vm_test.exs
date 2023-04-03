@@ -274,6 +274,25 @@ defmodule E4vmTest do
       assert vm.is_eval_mode == false
   end
 
+  test "test comma" do
+    vm = E4vm.new()
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string(",")
+
+    vm = vm
+      |> Map.merge(%{ds: Stack.push(vm.ds, 0)})
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.inspect_core()
+
+    vm = vm
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      |> E4vm.inspect_core()
+
+    assert vm.mem[vm.hereP - 1] == 0
+  end
+
   def hello(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
 

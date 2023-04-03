@@ -134,7 +134,7 @@ defmodule E4vm.Words.Core do
   def quit(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> quit    ")
     :erlang.halt()
-    vm
+    # vm
   end
 
   def dump(vm) do
@@ -187,9 +187,16 @@ defmodule E4vm.Words.Core do
     vm
   end
 
+  # Reserve data space for one cell and store w in the space.
+  # просто положит в ячейку на hereP++ число из стека
   def comma(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> comma   ")
-    vm
+    # AddOp(DS.Pop());
+    {:ok, top_ds}  = Stack.head(vm.ds)
+    {:ok, next_ds} = Stack.pop(vm.ds)
+
+    %E4vm{vm | ds: next_ds}
+    |> E4vm.add_op(top_ds)
   end
 
   # войти в eval режим - eval = true
