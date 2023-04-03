@@ -17,7 +17,8 @@ defmodule E4vm do
             wp: 0,                     # Указатель слова
             core: %{},                 # Base instructions
             entries: [],               # Word header dictionary
-            hereP: 0                   # Here pointer
+            hereP: 0,                  # Here pointer
+            is_eval_mode: true         #
 
 
   def new() do
@@ -31,6 +32,8 @@ defmodule E4vm do
     |> add_core_word("doList",    {E4vm.Words.Core, :do_list},        false)
     |> add_core_word("doLit",     {E4vm.Words.Core, :do_lit},         false)
     |> add_core_word("here",      {E4vm.Words.Core, :get_here_addr},  false)
+    |> add_core_word("[",         {E4vm.Words.Core, :lbrac},          true)
+    |> add_core_word("]",         {E4vm.Words.Core, :rbrac},          false)
     |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
     |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false) # TODO
     |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)  # TODO
@@ -40,8 +43,6 @@ defmodule E4vm do
     |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
     |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO
     |> add_core_word(",",         {E4vm.Words.Core, :comma},          false) # TODO
-    |> add_core_word("[",         {E4vm.Words.Core, :lbrac},          true)  # TODO
-    |> add_core_word("]",         {E4vm.Words.Core, :rbrac},          false) # TODO
     |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)  # TODO
   end
 
@@ -116,7 +117,7 @@ defmodule E4vm do
   def inspect_core(%E4vm{} = vm) do
     "Core:\r\n" <>
     "ip:#{vm.ip} wp:#{vm.wp} hereP:#{vm.hereP}\r\n" <>
-    "ds: #{inspect vm.ds} rs: #{inspect vm.rs}\r\nMem:"
+    "ds: #{inspect vm.ds} rs: #{inspect vm.rs} is_eval_mode: #{inspect vm.is_eval_mode} \r\nMem:"
     |> IO.puts()
 
     vm.mem

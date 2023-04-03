@@ -123,9 +123,9 @@ defmodule E4vm.Words.Core do
     end
   end
 
+  # поместит в стек данных адрес hereP
   def get_here_addr(vm) do
     "ip:#{vm.ip} wp:#{vm.wp} here:#{vm.hereP}" |> IO.inspect(label: ">>>>>>>>>>>> here    ")
-    # DS.Push(_hereP);
     next_ds = Stack.push(vm.ds, vm.hereP)
 
     %E4vm{vm | ds: next_ds}
@@ -179,6 +179,11 @@ defmodule E4vm.Words.Core do
 
   def tick(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> tick    ")
+
+    # next_ds = Stack.push(vm.ds, vm.hereP)
+
+    # %E4vm{vm | ds: next_ds}
+
     vm
   end
 
@@ -187,14 +192,16 @@ defmodule E4vm.Words.Core do
     vm
   end
 
+  # войти в eval режим - eval = true
   def lbrac(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> lbrac   ")
-    vm
+    %E4vm{vm | is_eval_mode: true}
   end
 
+  # выйти из eval режима - eval = false
   def rbrac(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> rbrac   ")
-    vm
+    %E4vm{vm | is_eval_mode: false}
   end
 
   def immediate(vm) do
