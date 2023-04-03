@@ -211,9 +211,16 @@ defmodule E4vm.Words.Core do
     %E4vm{vm | is_eval_mode: false}
   end
 
+  # делаем последнее определенное слово immediate = true
   def immediate(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> immediate")
-    vm
+
+  # {"hello2", {{E4vmTest, :hello}, false}}
+    [{word, {addr, _immediate}}|tail] = vm.entries
+
+    new_entries = [{word, {addr, true}}] ++ tail
+
+    %E4vm{vm | entries: new_entries}
   end
 
 end

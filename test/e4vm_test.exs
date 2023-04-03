@@ -293,6 +293,26 @@ defmodule E4vmTest do
     assert vm.mem[vm.hereP - 1] == 0
   end
 
+  test "immediate test" do
+    Process.register(self(), :test_proc)
+
+    vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.here_to_wp()
+
+    assert {"hello2", {{E4vmTest, :hello}, false}} = hd(vm.entries)
+
+    vm = vm
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("immediate")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      |> E4vm.inspect_core()
+
+    assert {"hello2", {{E4vmTest, :hello}, true}} = hd(vm.entries)
+  end
+
   def hello(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
 

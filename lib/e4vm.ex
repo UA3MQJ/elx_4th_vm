@@ -35,6 +35,7 @@ defmodule E4vm do
     |> add_core_word("[",         {E4vm.Words.Core, :lbrac},          true)
     |> add_core_word("]",         {E4vm.Words.Core, :rbrac},          false)
     |> add_core_word(",",         {E4vm.Words.Core, :comma},          false)
+    |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)
     |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
     |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false) # TODO
     |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)  # TODO
@@ -43,7 +44,6 @@ defmodule E4vm do
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
     |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
     |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO
-    |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)  # TODO
   end
 
   def add_core_word(%E4vm{} = vm, word, handler, immediate) do
@@ -126,6 +126,8 @@ defmodule E4vm do
     |> Enum.map(fn(k) ->
       "#{k}:#{vm.mem[k]} (#{inspect vm.core[vm.mem[k]]})" |> IO.puts()
     end)
+
+    vm.entries |> IO.inspect(label: "Entries")
 
     vm
   end
