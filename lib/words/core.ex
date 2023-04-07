@@ -84,7 +84,16 @@ defmodule E4vm.Words.Core do
 
   def begin_def_word(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> begin_def_word ")
-    vm
+
+    [{word, {addr, immediate, _enabled}}|tail] = vm.entries
+
+    new_entries = [{word, {addr, immediate, false}}] ++ tail
+
+    word = E4vm.read_word(vm)
+
+    %E4vm{vm | entries: new_entries, is_eval_mode: false}
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_header(word)
   end
 
   def end_def_word(vm) do

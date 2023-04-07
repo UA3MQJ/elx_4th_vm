@@ -344,6 +344,41 @@ defmodule E4vmTest do
     assert vm.mem[vm.hereP - 1] == E4vm.look_up_word_address(vm, "exit")
   end
 
+  test "read_word test" do
+    vm = E4vm.new()
+    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word1, []}}
+
+    assert E4vm.read_word(vm) == "word"
+  end
+
+  test "begin_def_word test" do
+    vm = E4vm.new()
+    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word2, []}}
+
+    vm = vm
+    |> E4vm.here_to_wp()
+    |> E4vm.add_op_from_string("doList")
+    |> E4vm.add_op_from_string(":")
+    |> E4vm.add_op_from_string("exit")
+    # |> E4vm.define("hui1", 555, true)
+    # |> E4vm.add_header("hui2")
+    # |> E4vm.add_op(0)
+    |> E4vm.inspect_core()
+    |> E4vm.Words.Core.do_list()
+    |> E4vm.Words.Core.next()
+    |> E4vm.inspect_core()
+
+
+  end
+
+  def word1() do
+    "word"
+  end
+
+  def word2() do
+    "defined_word"
+  end
+
   def hello(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
 
