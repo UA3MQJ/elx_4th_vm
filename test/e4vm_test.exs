@@ -298,7 +298,7 @@ defmodule E4vmTest do
       |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
       |> E4vm.here_to_wp()
 
-    assert {"hello2", {{E4vmTest, :hello}, false}} = hd(vm.entries)
+    assert {"hello2", {{E4vmTest, :hello}, false, _}} = hd(vm.entries)
 
     vm = vm
       |> E4vm.add_op_from_string("doList")
@@ -307,7 +307,7 @@ defmodule E4vmTest do
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
 
-    assert {"hello2", {{E4vmTest, :hello}, true}} = hd(vm.entries)
+    assert {"hello2", {{E4vmTest, :hello}, true, _}} = hd(vm.entries)
   end
 
   def hello(vm) do

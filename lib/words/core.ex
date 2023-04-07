@@ -169,7 +169,7 @@ defmodule E4vm.Words.Core do
 
     words = vm.entries
       |> :lists.reverse()
-      |> Enum.map(fn({word, {{_, _}, _}}) -> word end)
+      |> Enum.map(fn({word, {{_, _}, _, _}}) -> word end)
       |> Enum.join(" ")
       |> IO.inspect(label: ">>>>>>>>>>>> vm   ")
 
@@ -216,9 +216,9 @@ defmodule E4vm.Words.Core do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> immediate")
 
   # {"hello2", {{E4vmTest, :hello}, false}}
-    [{word, {addr, _immediate}}|tail] = vm.entries
+    [{word, {addr, _immediate, enabled}}|tail] = vm.entries
 
-    new_entries = [{word, {addr, true}}] ++ tail
+    new_entries = [{word, {addr, true, enabled}}] ++ tail
 
     %E4vm{vm | entries: new_entries}
   end

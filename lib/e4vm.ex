@@ -3,7 +3,8 @@ defmodule WordHeader do
   # immediate дает указание интерпретатору, что слово должно быть
   # выполнено в режиме программирования, а не записано в память
   defstruct address: 0,
-            immediate: false # флаг немедленной интерпретации.
+            immediate: false, # флаг немедленной интерпретации.
+            is_enable: true  # слово включено ?
 end
 
 defmodule E4vm do
@@ -37,13 +38,13 @@ defmodule E4vm do
     |> add_core_word(",",         {E4vm.Words.Core, :comma},          false)
     |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)
     |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
-    |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false) # TODO
+    |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false) # TODO deps readword
     |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)  # TODO
     |> add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
     |> add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false)
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
     |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
-    |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO
+    |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO deps readword
   end
 
   def add_core_word(%E4vm{} = vm, word, handler, immediate) do
@@ -59,7 +60,7 @@ defmodule E4vm do
   end
 
   defp define(%E4vm{} = vm, word, entry, immediate) do
-    entry = {word, {entry, immediate}}
+    entry = {word, {entry, immediate, true}}
     %E4vm{vm| entries: [entry] ++ vm.entries}
   end
 
@@ -76,7 +77,7 @@ defmodule E4vm do
   def look_up_word(%E4vm{} = vm, word) do
     case :proplists.get_value(word, vm.entries) do
       :undefined -> :undefined
-      {{_m, _f} = word, _immediate} -> word
+      {{_m, _f} = word, _immediate, _enabled} -> word
     end
   end
 
