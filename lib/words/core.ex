@@ -89,7 +89,13 @@ defmodule E4vm.Words.Core do
 
   def end_def_word(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> end_def_word ")
-    vm
+
+    [{word, {addr, immediate, _enabled}}|tail] = vm.entries
+
+    new_entries = [{word, {addr, immediate, true}}] ++ tail
+
+    %E4vm{vm | entries: new_entries, is_eval_mode: true}
+      |> E4vm.add_op_from_string("exit")
   end
 
   # переход по адресу в следующей ячейке

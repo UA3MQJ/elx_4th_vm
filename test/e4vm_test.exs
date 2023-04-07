@@ -310,6 +310,40 @@ defmodule E4vmTest do
     assert {"hello2", {{E4vmTest, :hello}, true, _}} = hd(vm.entries)
   end
 
+  test "end_def_word test" do
+    vm = E4vm.new()
+
+    #                                           immed  enabled
+    last_word = {"hello2", {{E4vmTest, :hello}, false, false}}
+
+    new_entries = [last_word] ++ vm.entries
+
+    vm = %E4vm{vm | entries: new_entries, is_eval_mode: false}
+
+    vm = vm
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string(";")
+      |> E4vm.add_op_from_string("exit")
+      # |> E4vm.inspect_core()
+
+    assert vm.is_eval_mode == false
+    [{word, {_addr, _immediate, enabled}}|tail] = vm.entries
+    assert enabled == false
+    old_here = vm.hereP
+
+    vm = vm
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      # |> E4vm.inspect_core()
+
+    assert vm.is_eval_mode == true
+    [{word, {_addr, _immediate, enabled}}|tail] = vm.entries
+    assert enabled == true
+    assert (old_here + 1) == vm.hereP
+    assert vm.mem[vm.hereP - 1] == E4vm.look_up_word_address(vm, "exit")
+  end
+
   def hello(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
 

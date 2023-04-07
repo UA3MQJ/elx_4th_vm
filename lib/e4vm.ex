@@ -39,7 +39,7 @@ defmodule E4vm do
     |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)
     |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
     |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false) # TODO deps readword
-    |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)  # TODO
+    |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)
     |> add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
     |> add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false)
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
