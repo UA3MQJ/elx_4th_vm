@@ -1,8 +1,6 @@
 defmodule E4vmTest do
   use ExUnit.Case
-  alias ElixirLS.LanguageServer.Server.InvalidParamError
   alias Structure.Stack
-  doctest E4vm
 
 
   # - последовательность команд в памяти, начинающаяся с какого-то адреса - это пользовательское слово.
@@ -389,12 +387,46 @@ defmodule E4vmTest do
     assert_receive :hello
   end
 
+  test "is_constant test" do
+    assert E4vm.is_constant("123") == true
+    assert E4vm.is_constant("+1") == true
+    assert E4vm.is_constant("+12") == true
+    assert E4vm.is_constant("+123") == true
+    assert E4vm.is_constant("-1") == true
+    assert E4vm.is_constant("-12") == true
+    assert E4vm.is_constant("-123") == true
+    assert E4vm.is_constant("h") == false
+    assert E4vm.is_constant("-h") == false
+    assert E4vm.is_constant("+h") == false
+  end
+
   test "eval test" do
+    Process.register(self(), :test_proc)
+
     vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.here_to_wp()
 
     vm
-      |> E4vm.eval(":  test1    hello hello ;")
       |> E4vm.inspect_core()
+      |> E4vm.eval("hello2")
+
+    assert_receive :hello
+
+    tvm = vm
+      |> E4vm.inspect_core()
+      |> E4vm.eval("123")
+      |> E4vm.inspect_core()
+
+    {:ok, top_ds} = Stack.head(tvm.ds)
+    assert top_ds == 123
+
+
+    # vm
+    #   |> E4vm.eval(":  test1    hello hello ;")
+    #   |> E4vm.inspect_core()
+
+
   end
 
   # слово определенное через :

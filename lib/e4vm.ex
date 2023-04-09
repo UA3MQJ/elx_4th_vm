@@ -11,6 +11,8 @@ defmodule E4vm do
   @moduledoc """
   Documentation for `E4vm`.
   """
+  alias Structure.Stack
+
   defstruct mem: %{}, # память программ
             rs: Structure.Stack.new(), # Стек возвратов
             ds: Structure.Stack.new(), # Стек данных
@@ -54,13 +56,61 @@ defmodule E4vm do
       IO.inspect(word, label: ">>>> word")
 
       if vm.is_eval_mode do
+        # eval mode
+        word_addr = look_up_word_address(vm, word)
+        if word_addr != :undefined do
+          execute(vm, word_addr)
+        else
+          IO.inspect(word, label: ">>>> not word")
 
-        vm
+          if is_constant(word) do
+            IO.inspect(word, label: ">>>> is_constant")
+
+            integer = String.to_integer(word)
+            next_ds = Stack.push(vm.ds, integer)
+
+            %E4vm{vm | ds: next_ds}
+          else
+
+            vm
+          end
+        end
       else
+        # program mode
 
         vm
       end
     end)
+  end
+
+
+  def execute(vm, word) when is_bitstring(word) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute word")
+
+    case look_up_word_address(vm, word) do
+      :undefined ->
+        IO.puts("The word #{inspect word} is undefined")
+        %E4vm{vm| ds: Structure.Stack.new()}
+      addr ->
+        execute(vm, addr)
+    end
+  end
+
+  def execute(vm, addr) when is_integer(addr) do
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute addr")
+
+    # try cath какой то надо, наверное
+    if addr < vm.entries do
+      # слово из core
+      {_word, {{m, f}, _immediate, _enable}} = :lists.nth(addr + 1, :lists.reverse(vm.entries))
+
+      apply(m, f, [vm])
+    else
+      # интерпретируемое слово
+      %E4vm{vm | ip: 0, wp: addr}
+        |> E4vm.Words.Core.do_list()
+        |> E4vm.Words.Core.next()
+    end
   end
 
   def read_word(%E4vm{} = vm) do
@@ -144,7 +194,7 @@ defmodule E4vm do
   def inspect_core(%E4vm{} = vm) do
     "Core:\r\n" <>
     "ip:#{vm.ip} wp:#{vm.wp} hereP:#{vm.hereP}\r\n" <>
-    "ds: #{inspect vm.ds} rs: #{inspect vm.rs} is_eval_mode: #{inspect vm.is_eval_mode} \r\nMem:"
+    "ds: #{inspect(vm.ds, charlists: :as_lists)} rs: #{inspect(vm.rs, charlists: :as_lists)} is_eval_mode: #{inspect vm.is_eval_mode} \r\nMem:"
     |> IO.puts()
 
     vm.mem
@@ -157,5 +207,20 @@ defmodule E4vm do
     vm.entries |> IO.inspect(label: "Entries")
 
     vm
+  end
+
+  def is_constant(string) do
+    cond do
+      is_digit(String.slice(string, 0..0)) ->
+        true
+      (String.length(string) >= 2) and (String.slice(string, 0..0) in ["+", "-"]) and (is_digit(String.slice(string, 1..1))) ->
+        true
+      true ->
+        false
+    end
+  end
+
+  def is_digit(char) do
+    char in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
   end
 end

@@ -1,5 +1,4 @@
 defmodule E4vm.Words.Core do
-
   alias Structure.Stack
 
   # Останавливаемся, если адрес 0
