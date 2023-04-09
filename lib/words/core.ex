@@ -77,9 +77,28 @@ defmodule E4vm.Words.Core do
     %E4vm{vm | ip: next_ip, ds: next_ds}
   end
 
+  # выполнить слово по адресу со стека ds - стек данных
   def execute(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute ")
-    vm
+
+    {:ok, top_ds} = Stack.head(vm.ds)
+    {:ok, next_ds} = Stack.pop(vm.ds)
+
+    addr = top_ds
+
+    length(vm.entries) |> IO.inspect(label: ">>>>>>>>>>>> execute ")
+
+    if addr < vm.entries do
+      # слово из core
+      {_word, {{m, f}, _immediate, _enable}} = :lists.nth(addr + 1, :lists.reverse(vm.entries))
+      next_vm = %E4vm{vm | ds: next_ds}
+
+      apply(m, f, [next_vm])
+    else
+      # интерпретируемое слово
+      %E4vm{vm | ds: next_ds}
+    end
+
   end
 
   def begin_def_word(vm) do

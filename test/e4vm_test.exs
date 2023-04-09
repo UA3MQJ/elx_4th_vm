@@ -366,7 +366,40 @@ defmodule E4vmTest do
     |> E4vm.inspect_core()
     |> E4vm.Words.Core.do_list()
     |> E4vm.Words.Core.next()
-    |> E4vm.inspect_core()
+    # |> E4vm.inspect_core()
+  end
+
+  # обычное слово из core
+  test "execute1 test" do
+    Process.register(self(), :test_proc)
+
+    vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("execute")
+      |> E4vm.add_op_from_string("exit")
+
+    vm = vm
+      |> Map.merge(%{ds: Stack.push(vm.ds, E4vm.look_up_word_address(vm, "hello2"))})
+      |> E4vm.inspect_core()
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+
+    assert_receive :hello
+  end
+
+  test "eval test" do
+    vm = E4vm.new()
+
+    vm
+      |> E4vm.eval(":  test1    hello hello ;")
+      |> E4vm.inspect_core()
+  end
+
+  # слово определенное через :
+  test "execute2 test" do
+    vm = E4vm.new()
 
 
   end

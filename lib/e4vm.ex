@@ -17,7 +17,7 @@ defmodule E4vm do
             ip: 0,                     # Указатель инструкций
             wp: 0,                     # Указатель слова
             core: %{},                 # Base instructions
-            entries: [],               # Word header dictionary
+            entries: [],               # Core Word header dictionary
             hereP: 0,                  # Here pointer
             is_eval_mode: true,        #
             read_word_mfa: nil         # {m,f,a}
@@ -38,7 +38,7 @@ defmodule E4vm do
     |> add_core_word("]",         {E4vm.Words.Core, :rbrac},          false)
     |> add_core_word(",",         {E4vm.Words.Core, :comma},          false)
     |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)
-    |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false) # TODO
+    |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false)
     |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false)
     |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)
     |> add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
@@ -46,6 +46,21 @@ defmodule E4vm do
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
     |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
     |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO deps readword
+  end
+
+  def eval(%E4vm{} = vm, string) do
+    String.split(string)
+    |> Enum.reduce(vm, fn word, vm ->
+      IO.inspect(word, label: ">>>> word")
+
+      if vm.is_eval_mode do
+
+        vm
+      else
+
+        vm
+      end
+    end)
   end
 
   def read_word(%E4vm{} = vm) do
@@ -91,6 +106,7 @@ defmodule E4vm do
     end
   end
 
+  # поиск адреса слова
   def look_up_word_address(%E4vm{} = vm, word) do
     case look_up_word(vm, word) do
       :undefined -> :undefined
