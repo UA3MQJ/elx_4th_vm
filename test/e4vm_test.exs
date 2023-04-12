@@ -1,6 +1,7 @@
 defmodule E4vmTest do
   use ExUnit.Case
   alias Structure.Stack
+  import ExUnit.CaptureLog
 
 
   # - последовательность команд в памяти, начинающаяся с какого-то адреса - это пользовательское слово.
@@ -408,19 +409,29 @@ defmodule E4vmTest do
       |> E4vm.here_to_wp()
 
     vm
-      |> E4vm.inspect_core()
-      |> E4vm.eval("hello2")
+      # |> E4vm.inspect_core()
+      |> E4vm.eval("hello2") # выполнит hello2
 
     assert_receive :hello
 
     tvm = vm
-      |> E4vm.inspect_core()
-      |> E4vm.eval("123")
-      |> E4vm.inspect_core()
+      # |> E4vm.inspect_core()
+      |> E4vm.eval("123")    # положит 123 на стек
+      # |> E4vm.inspect_core()
 
     {:ok, top_ds} = Stack.head(tvm.ds)
     assert top_ds == 123
 
+
+    {_result, log} =
+      with_log(fn ->
+
+      tvm = vm
+        |> E4vm.eval("undefined_word")    # ошибка
+
+    end)
+
+    assert log =~ "is undefined"
 
     # vm
     #   |> E4vm.eval(":  test1    hello hello ;")

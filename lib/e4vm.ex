@@ -11,6 +11,7 @@ defmodule E4vm do
   @moduledoc """
   Documentation for `E4vm`.
   """
+  require Logger
   alias Structure.Stack
 
   defstruct mem: %{}, # память программ
@@ -58,22 +59,19 @@ defmodule E4vm do
       if vm.is_eval_mode do
         # eval mode
         word_addr = look_up_word_address(vm, word)
-        if word_addr != :undefined do
-          execute(vm, word_addr)
-        else
-          IO.inspect(word, label: ">>>> not word")
-
-          if is_constant(word) do
-            IO.inspect(word, label: ">>>> is_constant")
-
+        cond do
+          # если это слово
+          word_addr != :undefined ->
+            execute(vm, word_addr)
+          # иначе, если это число
+          is_constant(word) ->
             integer = String.to_integer(word)
             next_ds = Stack.push(vm.ds, integer)
-
             %E4vm{vm | ds: next_ds}
-          else
-
-            vm
-          end
+          # иначе, это ошибка - такого слова нет и это не константа
+          true ->
+            Logger.error "The word #{word} is undefined"
+            %E4vm{vm| ds: Structure.Stack.new()}
         end
       else
         # program mode
