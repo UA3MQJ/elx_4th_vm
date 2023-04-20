@@ -345,14 +345,14 @@ defmodule E4vmTest do
 
   test "read_word test" do
     vm = E4vm.new()
-    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word1, []}}
+    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word3}, read_word_state: ["word"]}
 
-    assert E4vm.read_word(vm) == "word"
+    assert {_vm, "word"} = E4vm.read_word(vm)
   end
 
   test "begin_def_word test" do
     vm = E4vm.new()
-    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word2, []}}
+    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word3}, read_word_state: ["word"]}
 
     vm = vm
     |> E4vm.here_to_wp()
@@ -476,11 +476,25 @@ defmodule E4vmTest do
     assert E4vm.look_up_word_address(ttvm, "doLit") == ttvm.mem[(ttvm.hereP - 2)] # doLit
     assert 123 == ttvm.mem[(ttvm.hereP - 1)] # doLit
 
-    # vm
-    #   |> E4vm.eval(":  test1    hello hello ;")
-    #   |> E4vm.inspect_core()
 
 
+
+  end
+
+  # слово определенное через :
+  test "eval new word test" do
+    Process.register(self(), :test_proc)
+
+    vm = E4vm.new()
+      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+
+
+
+    vm = vm
+      |> E4vm.eval(":  test1    hello2 hello2 ;")
+
+    throw(vm)
+      # |> E4vm.inspect_core()
   end
 
   # слово определенное через :
@@ -496,6 +510,14 @@ defmodule E4vmTest do
 
   def word2() do
     "defined_word"
+  end
+
+  def word3(vm) do
+    [hd|tail] = vm.read_word_state
+
+    new_vm = %{vm| read_word_state: tail}
+
+    {new_vm, hd}
   end
 
   def hello(vm) do

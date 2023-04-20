@@ -23,7 +23,8 @@ defmodule E4vm do
             entries: [],               # Core Word header dictionary
             hereP: 0,                  # Here pointer
             is_eval_mode: true,        #
-            read_word_mfa: nil         # {m,f,a}
+            read_word_mfa: nil,        # {m,f,a}
+            read_word_state: nil
 
 
   def new() do
@@ -52,6 +53,15 @@ defmodule E4vm do
   end
 
   def eval(%E4vm{} = vm, string) do
+    read_word_state = String.split(string)
+    read_word_mfa = {E4vm, :read_word_function}
+
+    new_vm = %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
+
+
+  end
+
+  def eval_(%E4vm{} = vm, string) do
     String.split(string)
     |> Enum.reduce(vm, fn word, vm ->
       IO.inspect(word, label: ">>>> word")
@@ -134,8 +144,14 @@ defmodule E4vm do
   end
 
   def read_word(%E4vm{} = vm) do
-    {m, f, a} = vm.read_word_mfa
-    apply(m, f, a)
+    {m, f} = vm.read_word_mfa
+    {vm, word} = apply(m, f, [vm])
+  end
+
+  def read_word_function(vm) do
+    [hd|tail] = vm.read_word_state
+    new_vm = %{vm| read_word_state: tail}
+    {new_vm, hd}
   end
 
   def add_core_word(%E4vm{} = vm, word, handler, immediate) do
@@ -251,4 +267,6 @@ defmodule E4vm do
   def is_digit(char) do
     char in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
   end
+
+
 end
