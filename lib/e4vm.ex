@@ -56,9 +56,11 @@ defmodule E4vm do
     |> Enum.reduce(vm, fn word, vm ->
       IO.inspect(word, label: ">>>> word")
 
+      word_addr = look_up_word_address(vm, word)
+      IO.inspect(word_addr, label: ">>>> word_addr")
+
       if vm.is_eval_mode do
         # eval mode
-        word_addr = look_up_word_address(vm, word)
         cond do
           # если это слово
           word_addr != :undefined ->
@@ -70,13 +72,33 @@ defmodule E4vm do
             %E4vm{vm | ds: next_ds}
           # иначе, это ошибка - такого слова нет и это не константа
           true ->
-            Logger.error "The word #{word} is undefined"
+            Logger.error "(1) The word #{word} is undefined"
             %E4vm{vm| ds: Structure.Stack.new()}
         end
       else
         # program mode
+        cond do
+          # если это слово
+          word_addr != :undefined ->
+            word_entry = look_up_word_entry(vm, word)
+            {_, immediate, _} = word_entry
 
-        vm
+            if immediate do
+              execute(vm, word_addr)
+            else
+              add_op(vm, word_addr)
+            end
+          # иначе, если это число
+          is_constant(word) ->
+            # пишем в память dolit число
+            vm
+              |> add_op_from_string("doLit")
+              |> add_op(String.to_integer(word))
+          # иначе, это ошибка - такого слова нет и это не константа
+          true ->
+            Logger.error "(2) The word #{word} is undefined"
+            %E4vm{vm| ds: Structure.Stack.new(), is_eval_mode: true}
+        end
       end
     end)
   end
@@ -146,9 +168,17 @@ defmodule E4vm do
     %E4vm{vm| hereP: vm.hereP + 1}
   end
 
-  # lookup - поиск слова и адреса слова
-  def look_up_word(%E4vm{} = vm, word) do
+  # поиск свойств слова
+  def look_up_word_entry(%E4vm{} = vm, word) do
     case :proplists.get_value(word, vm.entries) do
+      :undefined -> :undefined
+      word_entry -> word_entry
+    end
+  end
+
+  # lookup - поиск слова
+  def look_up_word(%E4vm{} = vm, word) do
+    case look_up_word_entry(vm, word) do
       :undefined -> :undefined
       {{_m, _f} = word, _immediate, _enabled} -> word
     end
@@ -202,7 +232,7 @@ defmodule E4vm do
       "#{k}:#{vm.mem[k]} (#{inspect vm.core[vm.mem[k]]})" |> IO.puts()
     end)
 
-    vm.entries |> IO.inspect(label: "Entries")
+    vm.entries |> IO.inspect(label: "Entries [{word, {addr, immediate, enabled}}]")
 
     vm
   end

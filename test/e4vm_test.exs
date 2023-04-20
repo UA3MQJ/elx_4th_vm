@@ -433,6 +433,49 @@ defmodule E4vmTest do
 
     assert log =~ "is undefined"
 
+    # program mode
+    # если у нас режим программирования и слово immediate то оно должно немедленно выполниться
+    #                                           immed  enabled
+    last_word = {"hello2", {{E4vmTest, :hello}, true, true}}
+    new_entries = [last_word] ++ vm.entries
+    tvm = %E4vm{vm | entries: new_entries, is_eval_mode: false}
+
+    tvm
+      |> E4vm.eval("hello2")
+      # |> E4vm.inspect_core()
+
+    assert_receive :hello
+
+    # а если не immediate то не должно выполниться. а должно добавиться в память
+    last_word = {"hello2", {{E4vmTest, :hello}, false, true}}
+    new_entries = [last_word] ++ vm.entries
+    tvm = %E4vm{vm | entries: new_entries, is_eval_mode: false}
+
+    ttvm = tvm
+      |> E4vm.eval("hello2")
+      # |> E4vm.inspect_core()
+
+    refute_receive :hello
+    # в памяти должно добавиться слово
+    assert length(Map.keys(tvm.mem)) == length(Map.keys(ttvm.mem)) - 1
+    # и это слово должно быть hello2
+    assert E4vm.look_up_word_address(ttvm, "hello2") == ttvm.mem[(ttvm.hereP - 1)]
+
+    # а если это число, то добавить dolit число в память
+    last_word = {"hello2", {{E4vmTest, :hello}, false, true}}
+    new_entries = [last_word] ++ vm.entries
+    tvm = %E4vm{vm | entries: new_entries, is_eval_mode: false}
+
+    ttvm = tvm
+      |> E4vm.eval("123")
+      # |> E4vm.inspect_core()
+
+    # в памяти должно добавиться два слова
+    assert length(Map.keys(tvm.mem)) == length(Map.keys(ttvm.mem)) - 2
+    # и это слово должно быть
+    assert E4vm.look_up_word_address(ttvm, "doLit") == ttvm.mem[(ttvm.hereP - 2)] # doLit
+    assert 123 == ttvm.mem[(ttvm.hereP - 1)] # doLit
+
     # vm
     #   |> E4vm.eval(":  test1    hello hello ;")
     #   |> E4vm.inspect_core()
