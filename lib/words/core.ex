@@ -107,9 +107,9 @@ defmodule E4vm.Words.Core do
 
     new_entries = [{word, {addr, immediate, false}}] ++ tail
 
-    word = E4vm.read_word(vm)
+    {next_vm, word} = E4vm.read_word(vm)
 
-    %E4vm{vm | entries: new_entries, is_eval_mode: false}
+    %E4vm{next_vm | entries: new_entries, is_eval_mode: false}
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_header(word)
   end

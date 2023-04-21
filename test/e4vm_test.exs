@@ -409,8 +409,8 @@ defmodule E4vmTest do
       |> E4vm.here_to_wp()
 
     vm
-      # |> E4vm.inspect_core()
       |> E4vm.eval("hello2") # выполнит hello2
+      # |> E4vm.inspect_core()
 
     assert_receive :hello
 
@@ -475,10 +475,6 @@ defmodule E4vmTest do
     # и это слово должно быть
     assert E4vm.look_up_word_address(ttvm, "doLit") == ttvm.mem[(ttvm.hereP - 2)] # doLit
     assert 123 == ttvm.mem[(ttvm.hereP - 1)] # doLit
-
-
-
-
   end
 
   # слово определенное через :
@@ -488,20 +484,13 @@ defmodule E4vmTest do
     vm = E4vm.new()
       |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
 
-
-
     vm = vm
-      |> E4vm.eval(":  test1    hello2 hello2 ;")
+      |> E4vm.eval(": hell hello2 ;")
+      |> E4vm.inspect_core()
+      |> E4vm.eval("hell")
 
-    throw(vm)
-      # |> E4vm.inspect_core()
-  end
-
-  # слово определенное через :
-  test "execute2 test" do
-    vm = E4vm.new()
-
-
+    # должно выполниться вызов hello2 внутри определения hell
+    assert_receive :hello
   end
 
   def word1() do

@@ -57,11 +57,22 @@ defmodule E4vm do
     read_word_mfa = {E4vm, :read_word_function}
 
     new_vm = %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
-
-
+      |> interpreter()
   end
 
-  def eval_(%E4vm{} = vm, string) do
+  def interpreter(%E4vm{} = vm) do
+    case read_word(vm) do
+      {vm, :end} ->
+        vm
+      {new_vm, word} ->
+        IO.inspect(word, label: ">>>> interpreter word")
+        next_vm = interpreter_word(new_vm, word)
+        interpreter(next_vm) # interpreter next
+    end
+  end
+
+
+  def interpreter_word(%E4vm{} = vm, string) do
     String.split(string)
     |> Enum.reduce(vm, fn word, vm ->
       IO.inspect(word, label: ">>>> word")
@@ -115,7 +126,7 @@ defmodule E4vm do
 
 
   def execute(vm, word) when is_bitstring(word) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute word")
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute word #{inspect word}")
 
     case look_up_word_address(vm, word) do
       :undefined ->
@@ -127,10 +138,10 @@ defmodule E4vm do
   end
 
   def execute(vm, addr) when is_integer(addr) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute addr")
+    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute addr #{inspect addr}")
 
     # try cath какой то надо, наверное
-    if addr < vm.entries do
+    if addr <= Enum.max(Map.keys(vm.core)) do
       # слово из core
       {_word, {{m, f}, _immediate, _enable}} = :lists.nth(addr + 1, :lists.reverse(vm.entries))
 
@@ -146,6 +157,10 @@ defmodule E4vm do
   def read_word(%E4vm{} = vm) do
     {m, f} = vm.read_word_mfa
     {vm, word} = apply(m, f, [vm])
+  end
+
+  def read_word_function(%{read_word_state: read_word_state} = vm) when length(read_word_state)==0 do
+    {vm, :end}
   end
 
   def read_word_function(vm) do
@@ -172,7 +187,7 @@ defmodule E4vm do
   end
 
   def add_header(%E4vm{} = vm, word) do
-    vm |> E4vm.define(word, vm.hereP)
+    vm |> E4vm.define(word, vm.hereP - 1)
   end
 
   defp add_address_to_mem(%E4vm{} = vm, address) do
@@ -196,14 +211,18 @@ defmodule E4vm do
   def look_up_word(%E4vm{} = vm, word) do
     case look_up_word_entry(vm, word) do
       :undefined -> :undefined
-      {{_m, _f} = word, _immediate, _enabled} -> word
+      {{_m, _f} = core_word_mf, _immediate, _enabled} -> core_word_mf
+      {addr, _immediate, _enabled} -> {:addr, addr}
     end
   end
 
   # поиск адреса слова
   def look_up_word_address(%E4vm{} = vm, word) do
     case look_up_word(vm, word) do
-      :undefined -> :undefined
+      :undefined ->
+        :undefined
+      {:addr, addr} ->
+        addr
       {_m, _f} = word ->
         vm.core
           |> Enum.find(fn {_key, val} -> val == word end)
@@ -249,6 +268,8 @@ defmodule E4vm do
     end)
 
     vm.entries |> IO.inspect(label: "Entries [{word, {addr, immediate, enabled}}]")
+
+    vm.core |> IO.inspect(label: "core")
 
     vm
   end
