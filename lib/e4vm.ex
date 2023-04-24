@@ -49,7 +49,7 @@ defmodule E4vm do
     |> add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false)
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
     |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
-    |> add_core_word("'",         {E4vm.Words.Core, :tick},           false) # TODO deps readword
+    |> add_core_word("'",         {E4vm.Words.Core, :tick},           false)
   end
 
   def eval(%E4vm{} = vm, string) do

@@ -213,11 +213,17 @@ defmodule E4vm.Words.Core do
   def tick(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> tick    ")
 
-    # next_ds = Stack.push(vm.ds, vm.hereP)
-
-    # %E4vm{vm | ds: next_ds}
-
-    vm
+    case E4vm.read_word(vm) do
+      {vm, :end} ->
+        IO.inspect(label: ">>>> tick NO WORDS")
+        vm
+      {new_vm, word} ->
+        IO.inspect(word, label: ">>>> interpreter word")
+        word_addr = E4vm.look_up_word_address(new_vm, word)
+        IO.inspect(word_addr, label: ">>>> word_addr")
+        next_ds = Stack.push(new_vm.ds, word_addr)
+        %E4vm{new_vm | ds: next_ds}
+    end
   end
 
   # Reserve data space for one cell and store w in the space.

@@ -493,6 +493,29 @@ defmodule E4vmTest do
     assert_receive :hello
   end
 
+    # ' tick
+    test "tick test" do
+      vm = E4vm.new()
+      read_word_state = ["nop"]
+      read_word_mfa = {E4vm, :read_word_function}
+
+      new_vm = %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
+
+      vm2 = new_vm
+      |> E4vm.here_to_wp()
+      |> E4vm.add_op_from_string("doList")
+      |> E4vm.add_op_from_string("'")
+      |> E4vm.add_op_from_string("exit")
+      |> E4vm.Words.Core.do_list()
+      |> E4vm.Words.Core.next()
+      # |> E4vm.inspect_core()
+
+      # должно считать из входного потока слово nop и поместить его адрес(0) в стек ds
+      {:ok, top_ds} = Stack.head(vm2.ds)
+      assert top_ds == 0
+    end
+
+  # -----------------------
   def word1() do
     "word"
   end
