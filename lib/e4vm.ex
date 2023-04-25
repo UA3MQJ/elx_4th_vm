@@ -50,6 +50,11 @@ defmodule E4vm do
     |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
     |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
     |> add_core_word("'",         {E4vm.Words.Core, :tick},           false)
+    # mem
+    |> add_core_word("!",         {E4vm.Words.Mem, :write_mem},       false)
+    |> add_core_word("@",         {E4vm.Words.Mem, :read_mem},        false)
+    |> add_core_word("variable",  {E4vm.Words.Mem, :variable},        false)
+    |> add_core_word("constant",  {E4vm.Words.Mem, :constant},        false)
   end
 
   def eval(%E4vm{} = vm, string) do

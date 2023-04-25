@@ -1,6 +1,7 @@
-defmodule E4vmTest do
+defmodule E4vm.Words.CoreTest do
   use ExUnit.Case
   alias Structure.Stack
+  alias E4vm.Words.CoreTest
   import ExUnit.CaptureLog
 
 
@@ -33,7 +34,7 @@ defmodule E4vmTest do
     # })
 
     vm = vm
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
 
     start_program_addr = vm.hereP
 
@@ -58,7 +59,7 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
       |> E4vm.here_to_wp()
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nop")
@@ -77,7 +78,7 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
 
     sub_word_address = vm.hereP
 
@@ -121,7 +122,7 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
       |> E4vm.here_to_wp()
 
     start_addr = vm.hereP
@@ -162,7 +163,7 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
       |> E4vm.here_to_wp()
 
     start_addr = vm.hereP
@@ -194,7 +195,7 @@ defmodule E4vmTest do
     IO.puts("\r\n")
 
     vm = E4vm.new()
-    |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+    |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
     |> E4vm.here_to_wp()
 
     start_addr = vm.hereP
@@ -294,10 +295,10 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
       |> E4vm.here_to_wp()
 
-    assert {"hello2", {{E4vmTest, :hello}, false, _}} = hd(vm.entries)
+    assert {"hello2", {{CoreTest, :hello}, false, _}} = hd(vm.entries)
 
     vm = vm
       |> E4vm.add_op_from_string("doList")
@@ -306,14 +307,14 @@ defmodule E4vmTest do
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
 
-    assert {"hello2", {{E4vmTest, :hello}, true, _}} = hd(vm.entries)
+    assert {"hello2", {{CoreTest, :hello}, true, _}} = hd(vm.entries)
   end
 
   test "end_def_word test" do
     vm = E4vm.new()
 
     #                                           immed  enabled
-    last_word = {"hello2", {{E4vmTest, :hello}, false, false}}
+    last_word = {"hello2", {{CoreTest, :hello}, false, false}}
 
     new_entries = [last_word] ++ vm.entries
 
@@ -345,14 +346,14 @@ defmodule E4vmTest do
 
   test "read_word test" do
     vm = E4vm.new()
-    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word3}, read_word_state: ["word"]}
+    vm = %E4vm{vm | read_word_mfa: {CoreTest, :word3}, read_word_state: ["word"]}
 
     assert {_vm, "word"} = E4vm.read_word(vm)
   end
 
   test "begin_def_word test" do
     vm = E4vm.new()
-    vm = %E4vm{vm | read_word_mfa: {E4vmTest, :word3}, read_word_state: ["word"]}
+    vm = %E4vm{vm | read_word_mfa: {CoreTest, :word3}, read_word_state: ["word"]}
 
     vm = vm
     |> E4vm.here_to_wp()
@@ -362,7 +363,7 @@ defmodule E4vmTest do
     # |> E4vm.define("hui1", 555, true)
     # |> E4vm.add_header("hui2")
     # |> E4vm.add_op(0)
-    |> E4vm.inspect_core()
+    # |> E4vm.inspect_core()
     |> E4vm.Words.Core.do_list()
     |> E4vm.Words.Core.next()
     # |> E4vm.inspect_core()
@@ -373,7 +374,7 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
       |> E4vm.here_to_wp()
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("execute")
@@ -381,7 +382,7 @@ defmodule E4vmTest do
 
     vm = vm
       |> Map.merge(%{ds: Stack.push(vm.ds, E4vm.look_up_word_address(vm, "hello2"))})
-      |> E4vm.inspect_core()
+      # |> E4vm.inspect_core()
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
 
@@ -405,7 +406,7 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
       |> E4vm.here_to_wp()
 
     vm
@@ -436,7 +437,7 @@ defmodule E4vmTest do
     # program mode
     # если у нас режим программирования и слово immediate то оно должно немедленно выполниться
     #                                           immed  enabled
-    last_word = {"hello2", {{E4vmTest, :hello}, true, true}}
+    last_word = {"hello2", {{CoreTest, :hello}, true, true}}
     new_entries = [last_word] ++ vm.entries
     tvm = %E4vm{vm | entries: new_entries, is_eval_mode: false}
 
@@ -447,7 +448,7 @@ defmodule E4vmTest do
     assert_receive :hello
 
     # а если не immediate то не должно выполниться. а должно добавиться в память
-    last_word = {"hello2", {{E4vmTest, :hello}, false, true}}
+    last_word = {"hello2", {{CoreTest, :hello}, false, true}}
     new_entries = [last_word] ++ vm.entries
     tvm = %E4vm{vm | entries: new_entries, is_eval_mode: false}
 
@@ -462,7 +463,7 @@ defmodule E4vmTest do
     assert E4vm.look_up_word_address(ttvm, "hello2") == ttvm.mem[(ttvm.hereP - 1)]
 
     # а если это число, то добавить dolit число в память
-    last_word = {"hello2", {{E4vmTest, :hello}, false, true}}
+    last_word = {"hello2", {{CoreTest, :hello}, false, true}}
     new_entries = [last_word] ++ vm.entries
     tvm = %E4vm{vm | entries: new_entries, is_eval_mode: false}
 
@@ -482,11 +483,11 @@ defmodule E4vmTest do
     Process.register(self(), :test_proc)
 
     vm = E4vm.new()
-      |> E4vm.add_core_word("hello2",  {E4vmTest, :hello},   false)
+      |> E4vm.add_core_word("hello2",  {CoreTest, :hello},   false)
 
     vm = vm
       |> E4vm.eval(": hell hello2 ;")
-      |> E4vm.inspect_core()
+      # |> E4vm.inspect_core()
       |> E4vm.eval("hell")
 
     # должно выполниться вызов hello2 внутри определения hell
