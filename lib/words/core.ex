@@ -110,8 +110,8 @@ defmodule E4vm.Words.Core do
     {next_vm, word} = E4vm.read_word(vm)
 
     %E4vm{next_vm | entries: new_entries, is_eval_mode: false}
-      |> E4vm.add_op_from_string("doList")
-      |> E4vm.add_header(word)
+    |> E4vm.add_header(word) # <- add_header должен стоять первым!
+    |> E4vm.add_op_from_string("doList")
   end
 
   def end_def_word(vm) do
@@ -218,9 +218,9 @@ defmodule E4vm.Words.Core do
         IO.inspect(label: ">>>> tick NO WORDS")
         vm
       {new_vm, word} ->
-        IO.inspect(word, label: ">>>> interpreter word")
+        # IO.inspect(word, label: ">>>> interpreter word")
         word_addr = E4vm.look_up_word_address(new_vm, word)
-        IO.inspect(word_addr, label: ">>>> word_addr")
+        # IO.inspect(word_addr, label: ">>>> word_addr")
         next_ds = Stack.push(new_vm.ds, word_addr)
         %E4vm{new_vm | ds: next_ds}
     end

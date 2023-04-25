@@ -52,7 +52,14 @@ defmodule E4vm.Words.MemTest do
   end
 
   test "test constant" do
+    vm = E4vm.new()
+      |> E4vm.eval("123 constant X123") # определили константу
+      |> E4vm.eval("X123") # должна в стек положить 123
+      |> E4vm.inspect_core()
 
+      # в стеке должно быть значение константы 123
+      assert Stack.size(vm.ds) == 1
+      assert {:ok, 123} = Stack.head(vm.ds)
   end
 
   # -----------------------

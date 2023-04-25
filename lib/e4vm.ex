@@ -192,7 +192,7 @@ defmodule E4vm do
   end
 
   def add_header(%E4vm{} = vm, word) do
-    vm |> E4vm.define(word, vm.hereP - 1)
+    vm |> E4vm.define(word, vm.hereP)
   end
 
   defp add_address_to_mem(%E4vm{} = vm, address) do
