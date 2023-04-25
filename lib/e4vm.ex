@@ -55,6 +55,13 @@ defmodule E4vm do
     |> add_core_word("@",         {E4vm.Words.Mem, :read_mem},        false)
     |> add_core_word("variable",  {E4vm.Words.Mem, :variable},        false)
     |> add_core_word("constant",  {E4vm.Words.Mem, :constant},        false)
+    # stack
+    |> add_core_word("drop",      {E4vm.Words.Stack, :drop},          false)
+    |> add_core_word("swap",      {E4vm.Words.Stack, :swap},          false)
+    |> add_core_word("dup",       {E4vm.Words.Stack, :dup},           false)
+    |> add_core_word("over",      {E4vm.Words.Stack, :over},          false)
+    |> add_core_word("rot",       {E4vm.Words.Stack, :rot},           false)
+    |> add_core_word("nrot",      {E4vm.Words.Stack, :nrot},          false)
   end
 
   def eval(%E4vm{} = vm, string) do
