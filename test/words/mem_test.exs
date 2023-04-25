@@ -48,14 +48,22 @@ defmodule E4vm.Words.MemTest do
   end
 
   test "test variable" do
+    vm = E4vm.new()
+      |> E4vm.eval("variable X1") # определили переменную
+      |> E4vm.eval("X1") # должна в стек положить адрес переменной
+      # |> E4vm.inspect_core()
 
+      # в стеке должен быть адрес переменной должен быть перед определением x1 в памяти, те -1
+      assert Stack.size(vm.ds) == 1
+      x1_addr = E4vm.look_up_word_address(vm, "X1") - 1
+      assert {:ok, ^x1_addr} = Stack.head(vm.ds)
   end
 
   test "test constant" do
     vm = E4vm.new()
       |> E4vm.eval("123 constant X123") # определили константу
       |> E4vm.eval("X123") # должна в стек положить 123
-      |> E4vm.inspect_core()
+      # |> E4vm.inspect_core()
 
       # в стеке должно быть значение константы 123
       assert Stack.size(vm.ds) == 1
