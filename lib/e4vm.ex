@@ -10,6 +10,7 @@ end
 defmodule E4vm do
   @moduledoc """
   Documentation for `E4vm`.
+  ds word size - 16 bit
   """
   require Logger
   alias Structure.Stack
@@ -24,7 +25,8 @@ defmodule E4vm do
             hereP: 0,                  # Here pointer
             is_eval_mode: true,        #
             read_word_mfa: nil,        # {m,f,a}
-            read_word_state: nil
+            read_word_state: nil,
+            cell_bit_size: 16          # cell - 16 bit
 
 
   def new() do
@@ -70,6 +72,20 @@ defmodule E4vm do
     |> add_core_word("mod",       {E4vm.Words.Math, :mod},            false)
     |> add_core_word("1+",        {E4vm.Words.Math, :inc},            false)
     |> add_core_word("1-",        {E4vm.Words.Math, :dec},            false)
+    # boolean
+    |> add_core_word("true",      {E4vm.Words.Boolean, :bool_true},        false)
+    |> add_core_word("false",     {E4vm.Words.Boolean, :bool_false},       false)
+    |> add_core_word("and",       {E4vm.Words.Boolean, :bool_and},         false)
+    |> add_core_word("or",        {E4vm.Words.Boolean, :bool_or},          false)
+    |> add_core_word("xor",       {E4vm.Words.Boolean, :bool_xor},         false)
+    |> add_core_word("not",       {E4vm.Words.Boolean, :bool_not},         false)
+    |> add_core_word("invert",    {E4vm.Words.Boolean, :bool_invert},      false)
+    |> add_core_word("=",         {E4vm.Words.Boolean, :bool_eql},         false)
+    |> add_core_word("<>",        {E4vm.Words.Boolean, :bool_not_eql},     false)
+    |> add_core_word("<",         {E4vm.Words.Boolean, :bool_less},        false)
+    |> add_core_word(">",         {E4vm.Words.Boolean, :bool_greater},     false)
+    |> add_core_word("<=",        {E4vm.Words.Boolean, :bool_less_eql},    false)
+    |> add_core_word(">=",        {E4vm.Words.Boolean, :bool_greater_eql}, false)
   end
 
   def eval(%E4vm{} = vm, string) do
