@@ -176,7 +176,7 @@ defmodule E4vm do
 
   def read_word(%E4vm{} = vm) do
     {m, f} = vm.read_word_mfa
-    {vm, word} = apply(m, f, [vm])
+    {_vm, _word} = apply(m, f, [vm])
   end
 
   def read_word_function(%{read_word_state: read_word_state} = vm) when length(read_word_state)==0 do
@@ -307,11 +307,6 @@ defmodule E4vm do
 
   def is_digit(char) do
     char in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-  end
-
-  def ds_push(%E4vm{} = vm, value) do
-    next_ds = vm.ds |> Stack.push(value)
-    %E4vm{vm | ds: next_ds}
   end
 
 end

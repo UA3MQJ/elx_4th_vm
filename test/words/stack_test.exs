@@ -1,8 +1,5 @@
 defmodule E4vm.Words.StackTest do
   use ExUnit.Case
-  alias Structure.Stack
-  alias E4vm.Words.StackTest
-  import ExUnit.CaptureLog
 
   # удалить слово со стека ( x -- )
   test "test stack drop" do
@@ -11,15 +8,15 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("drop")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.ds_push(1)
-      |> E4vm.ds_push(2)
+      |> E4vm.Utils.ds_push(1)
+      |> E4vm.Utils.ds_push(2)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
 
     # [2, 1] -> [1]
-    assert Stack.size(vm.ds) == 1
-    assert {:ok, 1} = Stack.head(vm.ds)
+    # [2, 1] -> [1, 2]
+    assert "#Stack<[1]>" == inspect(vm.ds)
   end
 
   # обменять местами ( x1 x2 -- x2 x1 )
@@ -29,14 +26,13 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("swap")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.ds_push(1)
-      |> E4vm.ds_push(2)
+      |> E4vm.Utils.ds_push(1)
+      |> E4vm.Utils.ds_push(2)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
 
     # [2, 1] -> [1, 2]
-    assert Stack.size(vm.ds) == 2
     assert "#Stack<[1, 2]>" == inspect(vm.ds)
   end
 
@@ -47,13 +43,12 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("dup")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.ds_push(1)
+      |> E4vm.Utils.ds_push(1)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
 
     # [1] -> [1, 1]
-    assert Stack.size(vm.ds) == 2
     assert "#Stack<[1, 1]>" == inspect(vm.ds)
   end
 
@@ -65,14 +60,13 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("over")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.ds_push(1)
-      |> E4vm.ds_push(2)
+      |> E4vm.Utils.ds_push(1)
+      |> E4vm.Utils.ds_push(2)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
 
     # [1, 2] -> [1, 2, 1]
-    assert Stack.size(vm.ds) == 3
     assert "#Stack<[1, 2, 1]>" == inspect(vm.ds)
   end
 
@@ -83,14 +77,13 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("rot")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.ds_push(1)
-      |> E4vm.ds_push(2)
-      |> E4vm.ds_push(3)
+      |> E4vm.Utils.ds_push(1)
+      |> E4vm.Utils.ds_push(2)
+      |> E4vm.Utils.ds_push(3)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
 
-    assert Stack.size(vm.ds) == 3
     assert "#Stack<[2, 3, 1]>" == inspect(vm.ds)
   end
 
@@ -101,14 +94,13 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nrot")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.ds_push(1)
-      |> E4vm.ds_push(2)
-      |> E4vm.ds_push(3)
+      |> E4vm.Utils.ds_push(1)
+      |> E4vm.Utils.ds_push(2)
+      |> E4vm.Utils.ds_push(3)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
 
-    assert Stack.size(vm.ds) == 3
     assert "#Stack<[3, 1, 2]>" == inspect(vm.ds)
   end
 

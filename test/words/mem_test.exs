@@ -1,8 +1,6 @@
 defmodule E4vm.Words.MemTest do
   use ExUnit.Case
   alias Structure.Stack
-  alias E4vm.Words.MemTest
-  import ExUnit.CaptureLog
 
   test "test write mem !" do
     vm = E4vm.new()
@@ -10,8 +8,8 @@ defmodule E4vm.Words.MemTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("!")
       |> E4vm.add_op_from_string("exit")
-      |> E4vm.ds_push(1)
-      |> E4vm.ds_push(555)
+      |> E4vm.Utils.ds_push(1)
+      |> E4vm.Utils.ds_push(555)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
@@ -33,14 +31,14 @@ defmodule E4vm.Words.MemTest do
 
     # и поместим в стек адрес - 555 чтобы считать значение
     vm = vm
-      |> E4vm.ds_push(555)
+      |> E4vm.Utils.ds_push(555)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
 
     # в стеке адрес 555 должен замениться на значение из этой ячейки - 444
     assert Stack.size(vm.ds) == 1
-    assert {:ok, 444} = Stack.head(vm.ds)
+    assert E4vm.Utils.ds_pop(vm) == 444
   end
 
   test "test variable" do
@@ -51,8 +49,7 @@ defmodule E4vm.Words.MemTest do
 
       # в стеке должен быть адрес переменной должен быть перед определением x1 в памяти, те -1
       assert Stack.size(vm.ds) == 1
-      x1_addr = E4vm.look_up_word_address(vm, "X1") - 1
-      assert {:ok, ^x1_addr} = Stack.head(vm.ds)
+      assert E4vm.Utils.ds_pop(vm) == E4vm.look_up_word_address(vm, "X1") - 1
   end
 
   test "test constant" do
@@ -63,7 +60,7 @@ defmodule E4vm.Words.MemTest do
 
       # в стеке должно быть значение константы 123
       assert Stack.size(vm.ds) == 1
-      assert {:ok, 123} = Stack.head(vm.ds)
+      assert E4vm.Utils.ds_pop(vm) == 123
   end
 
   # -----------------------

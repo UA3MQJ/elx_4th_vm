@@ -32,13 +32,6 @@ defmodule E4vm.Words.Mem do
   def variable(%E4vm{} = vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> variable")
 
-    # var here = Here++;
-    # AddHeader(ReadWord(Input));
-    # AddOp(LookUp("doList").Address);
-    # AddOp(LookUp("doLit").Address);
-    # AddOp(here);
-    # AddOp(LookUp("exit").Address);
-
     here = vm.hereP
 
     vm = %E4vm{vm | hereP: vm.hereP + 1}
