@@ -10,12 +10,8 @@ defmodule E4vm.Words.MemTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("!")
       |> E4vm.add_op_from_string("exit")
-
-    # поместим в стек данные и адрес
-    new_ds = vm.ds |> Stack.push(1) |> Stack.push(555)
-
-    vm = vm
-      |> Map.merge(%{ds: new_ds})
+      |> E4vm.ds_push(1)
+      |> E4vm.ds_push(555)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
@@ -37,7 +33,7 @@ defmodule E4vm.Words.MemTest do
 
     # и поместим в стек адрес - 555 чтобы считать значение
     vm = vm
-      |> Map.merge(%{ds: Stack.push(vm.ds, 555)})
+      |> E4vm.ds_push(555)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()

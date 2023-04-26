@@ -11,11 +11,8 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("drop")
       |> E4vm.add_op_from_string("exit")
-
-    new_ds = vm.ds |> Stack.push(1) |> Stack.push(2)
-
-    vm = vm
-      |> Map.merge(%{ds: new_ds})
+      |> E4vm.ds_push(1)
+      |> E4vm.ds_push(2)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
@@ -32,11 +29,8 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("swap")
       |> E4vm.add_op_from_string("exit")
-
-    new_ds = vm.ds |> Stack.push(1) |> Stack.push(2)
-
-    vm = vm
-      |> Map.merge(%{ds: new_ds})
+      |> E4vm.ds_push(1)
+      |> E4vm.ds_push(2)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
@@ -53,11 +47,7 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("dup")
       |> E4vm.add_op_from_string("exit")
-
-    new_ds = vm.ds |> Stack.push(1)
-
-    vm = vm
-      |> Map.merge(%{ds: new_ds})
+      |> E4vm.ds_push(1)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
@@ -75,11 +65,8 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("over")
       |> E4vm.add_op_from_string("exit")
-
-    new_ds = vm.ds |> Stack.push(1) |> Stack.push(2)
-
-    vm = vm
-      |> Map.merge(%{ds: new_ds})
+      |> E4vm.ds_push(1)
+      |> E4vm.ds_push(2)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
@@ -96,11 +83,9 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("rot")
       |> E4vm.add_op_from_string("exit")
-
-    new_ds = vm.ds |> Stack.push(1) |> Stack.push(2) |> Stack.push(3)
-
-    vm = vm
-      |> Map.merge(%{ds: new_ds})
+      |> E4vm.ds_push(1)
+      |> E4vm.ds_push(2)
+      |> E4vm.ds_push(3)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()
@@ -116,11 +101,9 @@ defmodule E4vm.Words.StackTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nrot")
       |> E4vm.add_op_from_string("exit")
-
-    new_ds = vm.ds |> Stack.push(1) |> Stack.push(2) |> Stack.push(3)
-
-    vm = vm
-      |> Map.merge(%{ds: new_ds})
+      |> E4vm.ds_push(1)
+      |> E4vm.ds_push(2)
+      |> E4vm.ds_push(3)
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
       # |> E4vm.inspect_core()

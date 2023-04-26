@@ -172,7 +172,7 @@ defmodule E4vm.Words.CoreTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("0branch")
-      |> Map.merge(%{ds: Stack.push(vm.ds, 0)})
+      |> E4vm.ds_push(0)
 
     jmp_address = vm.hereP
 
@@ -204,7 +204,7 @@ defmodule E4vm.Words.CoreTest do
       |> E4vm.add_op_from_string("doList")
       |> E4vm.add_op_from_string("nop")
       |> E4vm.add_op_from_string("0branch")
-      |> Map.merge(%{ds: Stack.push(vm.ds, 1)})
+      |> E4vm.ds_push(1)
 
     jmp_address = vm.hereP
 
@@ -281,7 +281,7 @@ defmodule E4vm.Words.CoreTest do
       |> E4vm.add_op_from_string(",")
 
     vm = vm
-      |> Map.merge(%{ds: Stack.push(vm.ds, 0)})
+      |> E4vm.ds_push(0)
       |> E4vm.add_op_from_string("exit")
 
     vm = vm
@@ -381,7 +381,7 @@ defmodule E4vm.Words.CoreTest do
       |> E4vm.add_op_from_string("exit")
 
     vm = vm
-      |> Map.merge(%{ds: Stack.push(vm.ds, E4vm.look_up_word_address(vm, "hello2"))})
+      |> E4vm.ds_push(E4vm.look_up_word_address(vm, "hello2"))
       # |> E4vm.inspect_core()
       |> E4vm.Words.Core.do_list()
       |> E4vm.Words.Core.next()
