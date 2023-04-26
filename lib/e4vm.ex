@@ -62,13 +62,21 @@ defmodule E4vm do
     |> add_core_word("over",      {E4vm.Words.Stack, :over},          false)
     |> add_core_word("rot",       {E4vm.Words.Stack, :rot},           false)
     |> add_core_word("nrot",      {E4vm.Words.Stack, :nrot},          false)
+    # math
+    |> add_core_word("-",         {E4vm.Words.Math, :minus},          false)
+    |> add_core_word("+",         {E4vm.Words.Math, :plus},           false)
+    |> add_core_word("*",         {E4vm.Words.Math, :multiply},       false)
+    |> add_core_word("/",         {E4vm.Words.Math, :devide},         false)
+    |> add_core_word("mod",       {E4vm.Words.Math, :mod},            false)
+    |> add_core_word("1+",        {E4vm.Words.Math, :inc},            false)
+    |> add_core_word("1-",        {E4vm.Words.Math, :dec},            false)
   end
 
   def eval(%E4vm{} = vm, string) do
     read_word_state = String.split(string)
     read_word_mfa = {E4vm, :read_word_function}
 
-    new_vm = %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
+    %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
       |> interpreter()
   end
 
@@ -301,5 +309,9 @@ defmodule E4vm do
     char in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
   end
 
+  def ds_push(%E4vm{} = vm, value) do
+    next_ds = vm.ds |> Stack.push(value)
+    %E4vm{vm | ds: next_ds}
+  end
 
 end
