@@ -86,10 +86,14 @@ defmodule E4vm do
     |> add_core_word(">",         {E4vm.Words.Boolean, :bool_greater},     false)
     |> add_core_word("<=",        {E4vm.Words.Boolean, :bool_less_eql},    false)
     |> add_core_word(">=",        {E4vm.Words.Boolean, :bool_greater_eql}, false)
+    # comment
+    |> add_core_word("(",         {E4vm.Words.Comment, :comment},      true)
+    |> add_core_word("\\",        {E4vm.Words.Comment, :comment_line}, true)
   end
 
   def eval(%E4vm{} = vm, string) do
-    read_word_state = String.split(string)
+    read_word_state = String.split(string, [" "])
+    |> IO.inspect(label: ">>>>>>>>>>>> read_word_state")
     read_word_mfa = {E4vm, :read_word_function}
 
     %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
