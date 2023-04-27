@@ -39,4 +39,10 @@ defmodule E4vm.Utils do
   def true_const(%E4vm{cell_bit_size: cell_bit_size} = _vm),
     do: (2 ** cell_bit_size) - 1
 
+  def false_const(_vm),
+    do: 0
+
+  def to_bool_const(vm, true),  do: true_const(vm)
+  def to_bool_const(vm, false), do: false_const(vm)
+
 end

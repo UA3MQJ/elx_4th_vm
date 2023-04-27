@@ -38,30 +38,61 @@ defmodule E4vm.Words.Boolean do
     end)
   end
 
-  def bool_and(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_and(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      <<y :: integer-unsigned-16>> = <<band(x1, x2) :: integer-signed-16>>
+      y
+    end)
+  end
 
-  def bool_or(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_or(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      <<y :: integer-unsigned-16>> = <<bor(x1, x2) :: integer-signed-16>>
+      y
+    end)
+  end
 
-  def bool_xor(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_xor(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      <<y :: integer-unsigned-16>> = <<bxor(x1, x2) :: integer-signed-16>>
+      y
+    end)
+  end
 
-  def bool_eql(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_eql(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      E4vm.Utils.to_bool_const(vm, x1 == x2)
+    end)
+  end
 
-  def bool_not_eql(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_not_eql(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      E4vm.Utils.to_bool_const(vm, not(x1 == x2))
+    end)
+  end
 
-  def bool_less(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
 
-  def bool_greater(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_less(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      E4vm.Utils.to_bool_const(vm, (x1 < x2))
+    end)
+  end
 
-  def bool_less_eql(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_greater(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      E4vm.Utils.to_bool_const(vm, (x1 > x2))
+    end)
+  end
 
-  def bool_greater_eql(%E4vm{} = vm),
-    do: E4vm.Utils.ds2to1op(vm, fn(x1, x2) -> x1 - x2 end)
+  def bool_less_eql(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      E4vm.Utils.to_bool_const(vm, (x1 <= x2))
+    end)
+  end
+
+  def bool_greater_eql(%E4vm{} = vm) do
+    E4vm.Utils.ds2to1op(vm, fn(x1, x2) ->
+      E4vm.Utils.to_bool_const(vm, (x1 >= x2))
+    end)
+  end
 end
