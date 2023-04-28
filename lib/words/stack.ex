@@ -1,6 +1,16 @@
 defmodule E4vm.Words.Stack do
   alias Structure.Stack
 
+  def add_core_words(%E4vm{} = vm) do
+    vm
+    |> E4vm.add_core_word("drop",      {E4vm.Words.Stack, :drop},          false)
+    |> E4vm.add_core_word("swap",      {E4vm.Words.Stack, :swap},          false)
+    |> E4vm.add_core_word("dup",       {E4vm.Words.Stack, :dup},           false)
+    |> E4vm.add_core_word("over",      {E4vm.Words.Stack, :over},          false)
+    |> E4vm.add_core_word("rot",       {E4vm.Words.Stack, :rot},           false)
+    |> E4vm.add_core_word("nrot",      {E4vm.Words.Stack, :nrot},          false)
+  end
+
   # удалить слово со стека ( x -- )
   def drop(%E4vm{} = vm) do
     {:ok, next_ds} = Stack.pop(vm.ds)

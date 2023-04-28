@@ -30,70 +30,19 @@ defmodule E4vm do
 
 
   def new() do
-
     %E4vm{}
-    # core
-    |> add_core_word("nop",       {E4vm.Words.Core, :nop},            false)
-    |> add_core_word("exit",      {E4vm.Words.Core, :exit},           false)
-    |> add_core_word("quit",      {E4vm.Words.Core, :quit},           false)
-    |> add_core_word("next",      {E4vm.Words.Core, :next},           false)
-    |> add_core_word("doList",    {E4vm.Words.Core, :do_list},        false)
-    |> add_core_word("doLit",     {E4vm.Words.Core, :do_lit},         false)
-    |> add_core_word("here",      {E4vm.Words.Core, :get_here_addr},  false)
-    |> add_core_word("[",         {E4vm.Words.Core, :lbrac},          true)
-    |> add_core_word("]",         {E4vm.Words.Core, :rbrac},          false)
-    |> add_core_word(",",         {E4vm.Words.Core, :comma},          false)
-    |> add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)
-    |> add_core_word("execute",   {E4vm.Words.Core, :execute},        false)
-    |> add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false)
-    |> add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)
-    |> add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
-    |> add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false)
-    |> add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
-    |> add_core_word("words",     {E4vm.Words.Core, :words},          false)
-    |> add_core_word("'",         {E4vm.Words.Core, :tick},           false)
-    # mem
-    |> add_core_word("!",         {E4vm.Words.Mem, :write_mem},       false)
-    |> add_core_word("@",         {E4vm.Words.Mem, :read_mem},        false)
-    |> add_core_word("variable",  {E4vm.Words.Mem, :variable},        false)
-    |> add_core_word("constant",  {E4vm.Words.Mem, :constant},        false)
-    # stack
-    |> add_core_word("drop",      {E4vm.Words.Stack, :drop},          false)
-    |> add_core_word("swap",      {E4vm.Words.Stack, :swap},          false)
-    |> add_core_word("dup",       {E4vm.Words.Stack, :dup},           false)
-    |> add_core_word("over",      {E4vm.Words.Stack, :over},          false)
-    |> add_core_word("rot",       {E4vm.Words.Stack, :rot},           false)
-    |> add_core_word("nrot",      {E4vm.Words.Stack, :nrot},          false)
-    # math
-    |> add_core_word("-",         {E4vm.Words.Math, :minus},          false)
-    |> add_core_word("+",         {E4vm.Words.Math, :plus},           false)
-    |> add_core_word("*",         {E4vm.Words.Math, :multiply},       false)
-    |> add_core_word("/",         {E4vm.Words.Math, :devide},         false)
-    |> add_core_word("mod",       {E4vm.Words.Math, :mod},            false)
-    |> add_core_word("1+",        {E4vm.Words.Math, :inc},            false)
-    |> add_core_word("1-",        {E4vm.Words.Math, :dec},            false)
-    # boolean
-    |> add_core_word("true",      {E4vm.Words.Boolean, :bool_true},        false)
-    |> add_core_word("false",     {E4vm.Words.Boolean, :bool_false},       false)
-    |> add_core_word("and",       {E4vm.Words.Boolean, :bool_and},         false)
-    |> add_core_word("or",        {E4vm.Words.Boolean, :bool_or},          false)
-    |> add_core_word("xor",       {E4vm.Words.Boolean, :bool_xor},         false)
-    |> add_core_word("not",       {E4vm.Words.Boolean, :bool_not},         false)
-    |> add_core_word("invert",    {E4vm.Words.Boolean, :bool_invert},      false)
-    |> add_core_word("=",         {E4vm.Words.Boolean, :bool_eql},         false)
-    |> add_core_word("<>",        {E4vm.Words.Boolean, :bool_not_eql},     false)
-    |> add_core_word("<",         {E4vm.Words.Boolean, :bool_less},        false)
-    |> add_core_word(">",         {E4vm.Words.Boolean, :bool_greater},     false)
-    |> add_core_word("<=",        {E4vm.Words.Boolean, :bool_less_eql},    false)
-    |> add_core_word(">=",        {E4vm.Words.Boolean, :bool_greater_eql}, false)
-    # comment
-    |> add_core_word("(",         {E4vm.Words.Comment, :comment},      true)
-    |> add_core_word("\\",        {E4vm.Words.Comment, :comment_line}, true)
+    |> E4vm.Words.Core.add_core_words()
+    |> E4vm.Words.Mem.add_core_words()
+    |> E4vm.Words.Stack.add_core_words()
+    |> E4vm.Words.Math.add_core_words()
+    |> E4vm.Words.Boolean.add_core_words()
+    |> E4vm.Words.Comment.add_core_words()
+    |> E4vm.Words.RW.add_core_words()
   end
 
   def eval(%E4vm{} = vm, string) do
     read_word_state = String.split(string, [" "])
-    |> IO.inspect(label: ">>>>>>>>>>>> read_word_state")
+    # |> IO.inspect(label: ">>>>>>>>>>>> read_word_state")
     read_word_mfa = {E4vm, :read_word_function}
 
     %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
@@ -105,7 +54,7 @@ defmodule E4vm do
       {vm, :end} ->
         vm
       {new_vm, word} ->
-        IO.inspect(word, label: ">>>> interpreter word")
+        # IO.inspect(word, label: ">>>> interpreter word")
         next_vm = interpreter_word(new_vm, word)
         interpreter(next_vm) # interpreter next
     end
@@ -115,10 +64,10 @@ defmodule E4vm do
   def interpreter_word(%E4vm{} = vm, string) do
     String.split(string)
     |> Enum.reduce(vm, fn word, vm ->
-      IO.inspect(word, label: ">>>> word")
+      # IO.inspect(word, label: ">>>> word")
 
       word_addr = look_up_word_address(vm, word)
-      IO.inspect(word_addr, label: ">>>> word_addr")
+      # IO.inspect(word_addr, label: ">>>> word_addr")
 
       if vm.is_eval_mode do
         # eval mode
@@ -178,7 +127,7 @@ defmodule E4vm do
   end
 
   def execute(vm, addr) when is_integer(addr) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute addr #{inspect addr}")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute addr #{inspect addr}")
 
     # try cath какой то надо, наверное
     if addr <= Enum.max(Map.keys(vm.core)) do

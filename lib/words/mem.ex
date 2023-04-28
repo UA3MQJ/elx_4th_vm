@@ -1,6 +1,14 @@
 defmodule E4vm.Words.Mem do
   alias Structure.Stack
 
+  def add_core_words(%E4vm{} = vm) do
+    vm
+    |> E4vm.add_core_word("!",         {E4vm.Words.Mem, :write_mem},       false)
+    |> E4vm.add_core_word("@",         {E4vm.Words.Mem, :read_mem},        false)
+    |> E4vm.add_core_word("variable",  {E4vm.Words.Mem, :variable},        false)
+    |> E4vm.add_core_word("constant",  {E4vm.Words.Mem, :constant},        false)
+  end
+
   # запись в память ! ( x a-addr -- )
   def write_mem(%E4vm{} = vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> !")

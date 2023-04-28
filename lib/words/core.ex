@@ -1,6 +1,29 @@
 defmodule E4vm.Words.Core do
   alias Structure.Stack
 
+  def add_core_words(%E4vm{} = vm) do
+    vm
+    |> E4vm.add_core_word("nop",       {E4vm.Words.Core, :nop},            false)
+    |> E4vm.add_core_word("exit",      {E4vm.Words.Core, :exit},           false)
+    |> E4vm.add_core_word("quit",      {E4vm.Words.Core, :quit},           false)
+    |> E4vm.add_core_word("next",      {E4vm.Words.Core, :next},           false)
+    |> E4vm.add_core_word("doList",    {E4vm.Words.Core, :do_list},        false)
+    |> E4vm.add_core_word("doLit",     {E4vm.Words.Core, :do_lit},         false)
+    |> E4vm.add_core_word("here",      {E4vm.Words.Core, :get_here_addr},  false)
+    |> E4vm.add_core_word("[",         {E4vm.Words.Core, :lbrac},          true)
+    |> E4vm.add_core_word("]",         {E4vm.Words.Core, :rbrac},          false)
+    |> E4vm.add_core_word(",",         {E4vm.Words.Core, :comma},          false)
+    |> E4vm.add_core_word("immediate", {E4vm.Words.Core, :immediate},      true)
+    |> E4vm.add_core_word("execute",   {E4vm.Words.Core, :execute},        false)
+    |> E4vm.add_core_word(":",         {E4vm.Words.Core, :begin_def_word}, false)
+    |> E4vm.add_core_word(";",         {E4vm.Words.Core, :end_def_word},   true)
+    |> E4vm.add_core_word("branch",    {E4vm.Words.Core, :branch},         false)
+    |> E4vm.add_core_word("0branch",   {E4vm.Words.Core, :zbranch},        false)
+    |> E4vm.add_core_word("dump",      {E4vm.Words.Core, :dump},           false)
+    |> E4vm.add_core_word("words",     {E4vm.Words.Core, :words},          false)
+    |> E4vm.add_core_word("'",         {E4vm.Words.Core, :tick},           false)
+  end
+
   # Останавливаемся, если адрес 0
   def next(%E4vm{ip: 0} = vm) do
     # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next ok")

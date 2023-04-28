@@ -1,3 +1,5 @@
 %{
+  "elixir_make": {:hex, :elixir_make, "0.7.6", "67716309dc5d43e16b5abbd00c01b8df6a0c2ab54a8f595468035a50189f9169", [:mix], [{:castore, "~> 0.1 or ~> 1.0", [hex: :castore, repo: "hexpm", optional: true]}], "hexpm", "5a0569756b0f7873a77687800c164cca6dfc03a09418e6fcf853d78991f49940"},
+  "ex_ncurses": {:hex, :ex_ncurses, "0.3.1", "1c6c480815c3863fe45cecf54e86dcaa6fa4484847d05c77a090e1ecb384536b", [:make, :mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm", "becdfb047b1a24aff1ce60c55c805be52bbfaad8fcfa7db5d4df4bc0b09f1194"},
   "structure": {:hex, :structure, "0.2.2", "7ef81ba794da92ff74f0d20c7c662e0fe89461c5d40296e20ca199c6f472375c", [:mix], [], "hexpm", "eadddcce81a73958bcd1a713551f4ede454aca7c2eafdc74fd66bd7e90ea3f35"},
 }

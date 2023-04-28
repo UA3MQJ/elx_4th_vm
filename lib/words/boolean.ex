@@ -3,6 +3,23 @@ defmodule E4vm.Words.Boolean do
   require Logger
   use Bitwise
 
+  def add_core_words(%E4vm{} = vm) do
+    vm
+    |> E4vm.add_core_word("true",      {E4vm.Words.Boolean, :bool_true},        false)
+    |> E4vm.add_core_word("false",     {E4vm.Words.Boolean, :bool_false},       false)
+    |> E4vm.add_core_word("and",       {E4vm.Words.Boolean, :bool_and},         false)
+    |> E4vm.add_core_word("or",        {E4vm.Words.Boolean, :bool_or},          false)
+    |> E4vm.add_core_word("xor",       {E4vm.Words.Boolean, :bool_xor},         false)
+    |> E4vm.add_core_word("not",       {E4vm.Words.Boolean, :bool_not},         false)
+    |> E4vm.add_core_word("invert",    {E4vm.Words.Boolean, :bool_invert},      false)
+    |> E4vm.add_core_word("=",         {E4vm.Words.Boolean, :bool_eql},         false)
+    |> E4vm.add_core_word("<>",        {E4vm.Words.Boolean, :bool_not_eql},     false)
+    |> E4vm.add_core_word("<",         {E4vm.Words.Boolean, :bool_less},        false)
+    |> E4vm.add_core_word(">",         {E4vm.Words.Boolean, :bool_greater},     false)
+    |> E4vm.add_core_word("<=",        {E4vm.Words.Boolean, :bool_less_eql},    false)
+    |> E4vm.add_core_word(">=",        {E4vm.Words.Boolean, :bool_greater_eql}, false)
+  end
+
   def bool_true(%E4vm{} = vm) do
     # ( -- true )
     # Return a true flag, a single-cell value with all bits set.
