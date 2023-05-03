@@ -40,33 +40,9 @@ defmodule E4vm.Words.RW do
   end
 
   def key(%E4vm{} = vm) do
-    # ExNcurses.n_begin()
-    # ch = ExNcurses.getch()
-    # IO.write(">>>>>>>>>>>>>>>>>> #{inspect ch}")
-    # ExNcurses.n_end()
-
-    vm
+    read_char = E4vm.Utils.Keaboard.read_char()
+    next_ds = vm.ds |> Stack.push(read_char)
+    %E4vm{vm | ds: next_ds}
   end
-
-  def run_read_char do
-    alias Ratatouille.{EventManager, Window}
-    {:ok, _pid} = Window.start_link()
-    {:ok, _pid} = EventManager.start_link()
-    :ok = EventManager.subscribe(self())
-    run_rcv()
-  end
-
-  def run_rcv() do
-    alias Ratatouille.{EventManager, Window}
-    receive do
-      {:event, %{ch: ch}} ->
-        if ch >= 32 do
-          :ok = EventManager.stop()
-          :ok = Window.close()
-          ch
-        end
-    end
-  end
-
 
 end

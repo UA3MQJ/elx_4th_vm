@@ -1,6 +1,6 @@
 defmodule E4vm.Words.RWTest do
   use ExUnit.Case
-  import ExUnit.CaptureLog
+  import Mock
 
   test "test ." do
     vm = E4vm.new()
@@ -48,6 +48,17 @@ defmodule E4vm.Words.RWTest do
 
   test "test key" do
     vm = E4vm.new()
+
+    with_mocks([
+        {E4vm.Utils.Keaboard, [],
+        [
+        read_char: fn  ->
+            13
+          end
+        ]}
+      ]) do
+      assert vm |> E4vm.eval("key") |> E4vm.Utils.ds_pop() == 13
+    end
   end
 
 end
