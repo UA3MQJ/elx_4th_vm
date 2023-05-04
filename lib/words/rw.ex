@@ -22,6 +22,8 @@ defmodule E4vm.Words.RW do
   end
 
   def dot_s(%E4vm{} = vm) do
+    IO.write("<#{length(vm.ds.list)}> ")
+
     vm.ds.list
     |> :lists.reverse()
     |> Enum.map(fn(x) -> IO.write("#{x} ") end)

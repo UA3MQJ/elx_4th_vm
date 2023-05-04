@@ -26,7 +26,7 @@ defmodule E4vm.Words.Core do
 
   # Останавливаемся, если адрес 0
   def next(%E4vm{ip: 0} = vm) do
-    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next ok")
+    # # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next ok")
 
     vm
   end
@@ -34,7 +34,7 @@ defmodule E4vm.Words.Core do
   # Суть интерпретации заключается в переходе по адресу в памяти и в исполнении инструкции, которая там указана.
   def next(vm) do
     # vm |> IO.inspect(label: ">>>>>>>>>>>> next")
-    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next   ")
+    # # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> next   ")
 
     # выбираем адрес следующей инструкции
     next_wp = vm.mem[vm.ip]
@@ -63,7 +63,7 @@ defmodule E4vm.Words.Core do
   # задача которой — сохранить текущий адрес интерпретации на стеке
   # и установить адрес интерпретации следующего слова.
   def do_list(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> do_list")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> do_list")
 
     next_rs = Stack.push(vm.rs, vm.ip)
     next_ip = vm.wp + 1
@@ -74,7 +74,7 @@ defmodule E4vm.Words.Core do
   # команда для выхода из слова
   # восстанавливает адрес указателя инструкций IP со стека возвратов RS
   def exit(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> exit   ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> exit   ")
 
     {:ok, next_ip} = Stack.head(vm.rs)
     {:ok, next_rs} = Stack.pop(vm.rs)
@@ -84,7 +84,7 @@ defmodule E4vm.Words.Core do
 
   # нет операции
   def nop(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> nop    ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> nop    ")
     vm
   end
 
@@ -92,7 +92,7 @@ defmodule E4vm.Words.Core do
   # при компиляции перед каждой константой компилируется вызов слова doLit,
   # которое считывает следующее значение в памяти и размещает его на стеке данных.
   def do_lit(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> do_lit ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> do_lit ")
     next_ds = Stack.push(vm.ds, vm.mem[vm.ip])
     next_ip = vm.ip + 1
 
@@ -101,7 +101,7 @@ defmodule E4vm.Words.Core do
 
   # выполнить слово по адресу со стека ds - стек данных
   def execute(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute ")
 
     {:ok, top_ds} = Stack.head(vm.ds)
     {:ok, next_ds} = Stack.pop(vm.ds)
@@ -124,7 +124,7 @@ defmodule E4vm.Words.Core do
   end
 
   def begin_def_word(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> begin_def_word ")
+    # # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> begin_def_word ")
 
     [{word, {addr, immediate, _enabled}}|tail] = vm.entries
 
@@ -138,7 +138,7 @@ defmodule E4vm.Words.Core do
   end
 
   def end_def_word(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> end_def_word ")
+    # # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> end_def_word ")
 
     [{word, {addr, immediate, _enabled}}|tail] = vm.entries
 
@@ -150,7 +150,7 @@ defmodule E4vm.Words.Core do
 
   # переход по адресу в следующей ячейке
   def branch(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> branch  ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> branch  ")
 
     next_ip = vm.mem[vm.ip]
     %E4vm{vm | ip: next_ip}
@@ -159,7 +159,7 @@ defmodule E4vm.Words.Core do
   # переход по адресу, если в след ячейке 0. то есть false.
   # false - это все биты в ноле. true - это все биты одной ячейки(cell) в единице.
   def zbranch(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> zbranch ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> zbranch ")
 
     {:ok, top_ds} = Stack.head(vm.ds)
     {:ok, next_ds} = Stack.pop(vm.ds)
@@ -181,20 +181,20 @@ defmodule E4vm.Words.Core do
 
   # поместит в стек данных адрес hereP
   def get_here_addr(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp} here:#{vm.hereP}" |> IO.inspect(label: ">>>>>>>>>>>> here    ")
+    # "ip:#{vm.ip} wp:#{vm.wp} here:#{vm.hereP}" |> IO.inspect(label: ">>>>>>>>>>>> here    ")
     next_ds = Stack.push(vm.ds, vm.hereP)
 
     %E4vm{vm | ds: next_ds}
   end
 
-  def quit(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> quit    ")
+  def quit(_vm) do
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> quit    ")
     :erlang.halt()
     # vm
   end
 
   def dump(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> dump    ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> dump    ")
 
     {:ok, size} = Stack.head(vm.ds)
     {:ok, next_ds} = Stack.pop(vm.ds)
@@ -221,7 +221,7 @@ defmodule E4vm.Words.Core do
   end
 
   def words(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> words   ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> words   ")
 
     words = vm.entries
       |> :lists.reverse()
@@ -234,7 +234,7 @@ defmodule E4vm.Words.Core do
   end
 
   def tick(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> tick    ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> tick    ")
 
     case E4vm.read_word(vm) do
       {vm, :end} ->
@@ -252,7 +252,7 @@ defmodule E4vm.Words.Core do
   # Reserve data space for one cell and store w in the space.
   # просто положит в ячейку на hereP++ число из стека
   def comma(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> comma   ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> comma   ")
     # AddOp(DS.Pop());
     {:ok, top_ds}  = Stack.head(vm.ds)
     {:ok, next_ds} = Stack.pop(vm.ds)
@@ -263,19 +263,19 @@ defmodule E4vm.Words.Core do
 
   # войти в eval режим - eval = true
   def lbrac(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> lbrac   ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> lbrac   ")
     %E4vm{vm | is_eval_mode: true}
   end
 
   # выйти из eval режима - eval = false
   def rbrac(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> rbrac   ")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> rbrac   ")
     %E4vm{vm | is_eval_mode: false}
   end
 
   # делаем последнее определенное слово immediate = true
   def immediate(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> immediate")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> immediate")
 
   # {"hello2", {{E4vmTest, :hello}, false}}
     [{word, {addr, _immediate, enabled}}|tail] = vm.entries

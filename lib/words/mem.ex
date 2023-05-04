@@ -11,7 +11,7 @@ defmodule E4vm.Words.Mem do
 
   # запись в память ! ( x a-addr -- )
   def write_mem(%E4vm{} = vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> !")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> !")
 
     {:ok, address} = Stack.head(vm.ds)
     {:ok, next_ds} = Stack.pop(vm.ds)
@@ -26,7 +26,7 @@ defmodule E4vm.Words.Mem do
 
   # чтение из памяти @ ( a-addr -- x )
   def read_mem(%E4vm{} = vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> @")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> @")
 
     {:ok, address} = Stack.head(vm.ds)
     {:ok, next_ds} = Stack.pop(vm.ds)
@@ -38,7 +38,7 @@ defmodule E4vm.Words.Mem do
 
   # создает переменную ( -- a-addr )
   def variable(%E4vm{} = vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> variable")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> variable")
 
     here = vm.hereP
 
@@ -62,7 +62,7 @@ defmodule E4vm.Words.Mem do
 
   # создает константу ( x "<spaces>name" -- )
   def constant(%E4vm{} = vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> constant")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> constant")
 
     case E4vm.read_word(vm) do
       {vm, :end} ->

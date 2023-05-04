@@ -40,6 +40,23 @@ defmodule E4vm do
     |> E4vm.Words.RW.add_core_words()
   end
 
+  def console() do
+    IO.puts("elx_4th_vm console\r\nType some forth commands. Type 'bye' to exit.\r\n")
+    console(E4vm.new())
+  end
+
+  def console(%E4vm{} = vm) do
+    input_string = IO.gets(:stdio, "")
+
+    if input_string not in ["bye\n", "bye\r", "bye\r\n"] do
+      new_vm = eval(vm, input_string)
+      IO.write("ok\r\n")
+      console(new_vm)
+    else
+      :ok
+    end
+  end
+
   def eval(%E4vm{} = vm, string) do
     read_word_state = String.split(string, [" "])
     # |> IO.inspect(label: ">>>>>>>>>>>> read_word_state")
@@ -115,7 +132,7 @@ defmodule E4vm do
 
 
   def execute(vm, word) when is_bitstring(word) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute word #{inspect word}")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute word #{inspect word}")
 
     case look_up_word_address(vm, word) do
       :undefined ->
@@ -127,7 +144,7 @@ defmodule E4vm do
   end
 
   def execute(vm, addr) when is_integer(addr) do
-    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute addr #{inspect addr}")
+    # # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> execute addr #{inspect addr}")
 
     # try cath какой то надо, наверное
     if addr <= Enum.max(Map.keys(vm.core)) do
@@ -234,18 +251,18 @@ defmodule E4vm do
 
   # сохранить текущее here в wp чтобы это место считать стартовым для программы
   def here_to_wp(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->wp")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->wp")
     %E4vm{vm | wp: vm.hereP}
   end
 
   def here_to_ip(vm) do
-    "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->ip")
+    # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->ip")
     %E4vm{vm | ip: vm.hereP}
   end
 
   def inspect_core(%E4vm{} = vm) do
     "Core:\r\n" <>
-    "ip:#{vm.ip} wp:#{vm.wp} hereP:#{vm.hereP}\r\n" <>
+    # "ip:#{vm.ip} wp:#{vm.wp} hereP:#{vm.hereP}\r\n" <>
     "ds: #{inspect(vm.ds, charlists: :as_lists)} rs: #{inspect(vm.rs, charlists: :as_lists)} is_eval_mode: #{inspect vm.is_eval_mode} \r\nMem:"
     |> IO.puts()
 
