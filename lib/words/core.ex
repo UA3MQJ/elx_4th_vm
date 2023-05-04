@@ -227,7 +227,7 @@ defmodule E4vm.Words.Core do
       |> :lists.reverse()
       |> Enum.map(fn({word, {{_, _}, _, _}}) -> word end)
       |> Enum.join(" ")
-      |> IO.inspect(label: ">>>>>>>>>>>> vm   ")
+      # |> IO.inspect(label: ">>>>>>>>>>>> vm   ")
 
     IO.puts("\r\n#{words}\r\n")
     vm
