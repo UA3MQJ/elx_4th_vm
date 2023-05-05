@@ -4,6 +4,19 @@ Elixir based Forth VM based on materials from https://habr.com/ru/company/tinkof
 
 source https://github.com/Tinkoff/Ogam3/blob/master/Ogam3/Frt/OForth.cs
 
+# Project progress
+
+Implemented words
+
+- [x] Core: `nop exit quit next doList doLit here [ ] , immediate execute : ; branch 0branch dump words '`
+- [x] Mem: `! @ variable constant`
+- [x] Stack: `drop swap dup over rot nrot`
+- [x] Math: `- + * / mod 1+ 1-`
+- [x] Boolean: `true false and or xor not invert = <> < > <= >=`
+- [x] Comment: `( \\`
+- [ ] RW: `. .s cr bl word s" key` TODO: `word s"`
+
+
 # quick start
 
 Install Erlang and Elixir. You can install it, for example, using [asdf](https://github.com/asdf-vm/asdf) 
