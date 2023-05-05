@@ -19,7 +19,7 @@ defmodule E4vm.Words.RWTest do
 
     assert ExUnit.CaptureIO.capture_io(fn ->
       vm |> E4vm.eval("1 2 3 .s")
-    end) == "1 2 3 "
+    end) == "<3> 1 2 3 "
   end
 
   test "test cr" do
