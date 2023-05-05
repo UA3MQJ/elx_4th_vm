@@ -3,7 +3,7 @@ defmodule E4vm.Words.CommentTest do
 
   test "test comment line" do
     vm = E4vm.new()
-    |> E4vm.eval("1234 \\ comment to the end of the line \r\n 4321")
+    |> E4vm.eval("1234 \\\\ comment to the end of the line \r\n 4321")
 
     assert "#Stack<[4321, 1234]>" == inspect(vm.ds)
   end

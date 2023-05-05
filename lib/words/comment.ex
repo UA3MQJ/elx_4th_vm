@@ -2,7 +2,7 @@ defmodule E4vm.Words.Comment do
   def add_core_words(%E4vm{} = vm) do
     vm
     |> E4vm.add_core_word("(",         {E4vm.Words.Comment, :comment},      true)
-    |> E4vm.add_core_word("\\",        {E4vm.Words.Comment, :comment_line}, true)
+    |> E4vm.add_core_word("\\\\",      {E4vm.Words.Comment, :comment_line}, true)
   end
 
   def comment(%E4vm{} = vm) do
