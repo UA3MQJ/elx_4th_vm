@@ -73,7 +73,7 @@ defmodule E4vm do
       {vm, :end} ->
         vm
       {new_vm, word} ->
-        # IO.inspect(word, label: ">>>> interpreter word")
+        IO.inspect(word, label: ">>>> interpreter word")
         next_vm = interpreter_word(new_vm, word)
         interpreter(next_vm) # interpreter next
     end
