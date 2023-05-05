@@ -61,7 +61,7 @@ defmodule E4vm do
   end
 
   def eval(%E4vm{} = vm, string) do
-    read_char_mfa = {E4vm, :read_char_mfa}
+    read_char_mfa = {E4vm, :read_string_char_function}
     read_char_state = string
 
     %E4vm{vm| read_char_mfa: read_char_mfa, read_char_state: read_char_state}
