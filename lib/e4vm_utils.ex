@@ -45,4 +45,23 @@ defmodule E4vm.Utils do
   def to_bool_const(vm, true),  do: true_const(vm)
   def to_bool_const(vm, false), do: false_const(vm)
 
+  def inspect_core(%E4vm{} = vm) do
+    "Core:\r\n" <>
+    # "ip:#{vm.ip} wp:#{vm.wp} hereP:#{vm.hereP}\r\n" <>
+    "ds: #{inspect(vm.ds, charlists: :as_lists)} rs: #{inspect(vm.rs, charlists: :as_lists)} is_eval_mode: #{inspect vm.is_eval_mode} \r\nMem:"
+    |> IO.puts()
+
+    vm.mem
+    |> Map.keys()
+    |> Enum.sort()
+    |> Enum.map(fn(k) ->
+      "#{k}:#{vm.mem[k]} (#{inspect vm.core[vm.mem[k]]})" |> IO.puts()
+    end)
+
+    vm.entries |> IO.inspect(label: "Entries [{word, {addr, immediate, enabled}}]")
+
+    vm.core |> IO.inspect(label: "core")
+
+    vm
+  end
 end

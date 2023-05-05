@@ -1,5 +1,6 @@
 defmodule E4vm.Words.RW do
   alias Structure.Stack
+  require Logger
 
   def add_core_words(%E4vm{} = vm) do
     vm
@@ -42,9 +43,34 @@ defmodule E4vm.Words.RW do
   end
 
   def key(%E4vm{} = vm) do
-    read_char = E4vm.Utils.Keaboard.read_char()
-    next_ds = vm.ds |> Stack.push(read_char)
-    %E4vm{vm | ds: next_ds}
+    # TODO переключение ввода?
+    case E4vm.read_char(vm) do
+      {_vm, :end} ->
+        Logger.error("read_char error: end of char sequence")
+        vm
+      {new_vm, <<char_number>>} ->
+        next_ds = new_vm.ds |> Stack.push(char_number)
+        %E4vm{new_vm | ds: next_ds}
+    end
+  end
+
+  def read_word(%E4vm{} = vm) do
+    case E4vm.read_word(vm) do
+      {_vm, :end} ->
+        Logger.error("read_char error: end of char sequence")
+        vm
+      {new_vm, word} ->
+        Logger.info("read_word: #{inspect word}")
+        if new_vm.is_eval_mode do
+          # DS.Push(str);
+                  # next_ds = new_vm.ds |> Stack.push(char_number)
+          new_vm
+        else
+          # AddOp(LookUp("doLit").Address);
+          # AddOp(str);
+          new_vm
+        end
+    end
   end
 
 end

@@ -25,8 +25,6 @@ defmodule E4vm do
             hereP: 0,                  # Here pointer
             is_eval_mode: true,        #
             # channel options
-            # read_word_mfa: nil,        # {m,f}
-            # read_word_state: nil,
             read_char_mfa: nil,        # {m,f}
             read_char_state: nil,
             cell_bit_size: 16          # cell - 16 bit
@@ -177,7 +175,7 @@ defmodule E4vm do
             do_read_word(word, next_vm)
           # иначе возвращаем слово
           else
-            {next_vm, word}
+            {vm, word} # vm, а не next_vm - не выкидываем пробел
           end
         else
           # если символ не пробельный - добавляем
@@ -295,26 +293,6 @@ defmodule E4vm do
   def here_to_ip(vm) do
     # "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>>>>>>>>> here->ip")
     %E4vm{vm | ip: vm.hereP}
-  end
-
-  def inspect_core(%E4vm{} = vm) do
-    "Core:\r\n" <>
-    # "ip:#{vm.ip} wp:#{vm.wp} hereP:#{vm.hereP}\r\n" <>
-    "ds: #{inspect(vm.ds, charlists: :as_lists)} rs: #{inspect(vm.rs, charlists: :as_lists)} is_eval_mode: #{inspect vm.is_eval_mode} \r\nMem:"
-    |> IO.puts()
-
-    vm.mem
-    |> Map.keys()
-    |> Enum.sort()
-    |> Enum.map(fn(k) ->
-      "#{k}:#{vm.mem[k]} (#{inspect vm.core[vm.mem[k]]})" |> IO.puts()
-    end)
-
-    vm.entries |> IO.inspect(label: "Entries [{word, {addr, immediate, enabled}}]")
-
-    vm.core |> IO.inspect(label: "core")
-
-    vm
   end
 
   def is_constant(string) do
