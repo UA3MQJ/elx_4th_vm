@@ -80,57 +80,51 @@ defmodule E4vm do
   end
 
 
-  def interpreter_word(%E4vm{} = vm, string) do
-    # todo readword!
-    String.split(string)
-    |> Enum.reduce(vm, fn word, vm ->
-      # IO.inspect(word, label: ">>>> word")
+  def interpreter_word(%E4vm{} = vm, word) do
+    word_addr = look_up_word_address(vm, word)
+    # IO.inspect(word_addr, label: ">>>> word_addr")
 
-      word_addr = look_up_word_address(vm, word)
-      # IO.inspect(word_addr, label: ">>>> word_addr")
-
-      if vm.is_eval_mode do
-        # eval mode
-        cond do
-          # если это слово
-          word_addr != :undefined ->
-            execute(vm, word_addr)
-          # иначе, если это число
-          is_constant(word) ->
-            integer = String.to_integer(word)
-            next_ds = Stack.push(vm.ds, integer)
-            %E4vm{vm | ds: next_ds}
-          # иначе, это ошибка - такого слова нет и это не константа
-          true ->
-            Logger.error "(1) The word #{word} is undefined"
-            %E4vm{vm| ds: Structure.Stack.new()}
-        end
-      else
-        # program mode
-        cond do
-          # если это слово
-          word_addr != :undefined ->
-            word_entry = look_up_word_entry(vm, word)
-            {_, immediate, _} = word_entry
-
-            if immediate do
-              execute(vm, word_addr)
-            else
-              add_op(vm, word_addr)
-            end
-          # иначе, если это число
-          is_constant(word) ->
-            # пишем в память dolit число
-            vm
-              |> add_op_from_string("doLit")
-              |> add_op(String.to_integer(word))
-          # иначе, это ошибка - такого слова нет и это не константа
-          true ->
-            Logger.error "(2) The word #{word} is undefined"
-            %E4vm{vm| ds: Structure.Stack.new(), is_eval_mode: true}
-        end
+    if vm.is_eval_mode do
+      # eval mode
+      cond do
+        # если это слово
+        word_addr != :undefined ->
+          execute(vm, word_addr)
+        # иначе, если это число
+        is_constant(word) ->
+          integer = String.to_integer(word)
+          next_ds = Stack.push(vm.ds, integer)
+          %E4vm{vm | ds: next_ds}
+        # иначе, это ошибка - такого слова нет и это не константа
+        true ->
+          Logger.error "(1) The word #{word} is undefined"
+          %E4vm{vm| ds: Structure.Stack.new()}
       end
-    end)
+    else
+      # program mode
+      cond do
+        # если это слово
+        word_addr != :undefined ->
+          word_entry = look_up_word_entry(vm, word)
+          {_, immediate, _} = word_entry
+
+          if immediate do
+            execute(vm, word_addr)
+          else
+            add_op(vm, word_addr)
+          end
+        # иначе, если это число
+        is_constant(word) ->
+          # пишем в память dolit число
+          vm
+            |> add_op_from_string("doLit")
+            |> add_op(String.to_integer(word))
+        # иначе, это ошибка - такого слова нет и это не константа
+        true ->
+          Logger.error "(2) The word #{word} is undefined"
+          %E4vm{vm| ds: Structure.Stack.new(), is_eval_mode: true}
+      end
+    end
   end
 
 
@@ -162,44 +156,6 @@ defmodule E4vm do
         |> E4vm.Words.Core.next()
     end
   end
-
-  # def read_word_function(%{read_word_state: read_word_state} = vm) do
-  #   # [hd|tail] = vm.read_word_state
-  #   # new_vm = %{vm| read_word_state: tail}
-  #   # {new_vm, hd}
-  #   if String.length(read_word_state) > 0 do
-  #     # <<a>> <> rest ="1 22 333"
-  #     # if <<a>> in [" ", "\n", "\r", "\t"] do
-  #     # else
-  #     # end
-  #     {vm, :end}
-  #   else
-  #     {vm, :end}
-  #   end
-
-  # end
-
-
-  # def read_word_from_string(w, tail) do
-  #   if String.length(tail) > 0 do
-  #     <<ch>> <> rest = tail
-  #     # читаем символ. если он пробел, то ищем слово или возвращаем, если уже есть
-  #     if <<ch>> in [" ", "\n", "\r", "\t"] do
-  #       # если пусто, то еще ничего на считали и продолждаем
-  #       if w=="" do
-  #         read_word_from_string(w, rest)
-  #       # иначе возвращаем слово
-  #       else
-  #         {w, tail}
-  #       end
-  #     else
-  #     # если символ не пробел - добавляем
-  #     read_word_from_string(w <> <<ch>>, rest)
-  #     end
-  #   else
-  #     {w, tail}
-  #   end
-  # end
 
   def read_word(%E4vm{} = vm) do
     {_next_vm, _word} = do_read_word("", vm)
