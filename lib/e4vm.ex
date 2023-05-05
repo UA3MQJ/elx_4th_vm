@@ -24,8 +24,11 @@ defmodule E4vm do
             entries: [],               # Core Word header dictionary
             hereP: 0,                  # Here pointer
             is_eval_mode: true,        #
-            read_word_mfa: nil,        # {m,f,a}
-            read_word_state: nil,
+            # channel options
+            # read_word_mfa: nil,        # {m,f}
+            # read_word_state: nil,
+            read_char_mfa: nil,        # {m,f}
+            read_char_state: nil,
             cell_bit_size: 16          # cell - 16 bit
 
 
@@ -58,11 +61,10 @@ defmodule E4vm do
   end
 
   def eval(%E4vm{} = vm, string) do
-    read_word_state = String.split(string, [" "])
-    # |> IO.inspect(label: ">>>>>>>>>>>> read_word_state")
-    read_word_mfa = {E4vm, :read_word_function}
+    read_char_mfa = {E4vm, :read_char_mfa}
+    read_char_state = string
 
-    %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
+    %E4vm{vm| read_char_mfa: read_char_mfa, read_char_state: read_char_state}
       |> interpreter()
   end
 
@@ -79,6 +81,7 @@ defmodule E4vm do
 
 
   def interpreter_word(%E4vm{} = vm, string) do
+    # todo readword!
     String.split(string)
     |> Enum.reduce(vm, fn word, vm ->
       # IO.inspect(word, label: ">>>> word")
@@ -160,19 +163,97 @@ defmodule E4vm do
     end
   end
 
+  # def read_word_function(%{read_word_state: read_word_state} = vm) do
+  #   # [hd|tail] = vm.read_word_state
+  #   # new_vm = %{vm| read_word_state: tail}
+  #   # {new_vm, hd}
+  #   if String.length(read_word_state) > 0 do
+  #     # <<a>> <> rest ="1 22 333"
+  #     # if <<a>> in [" ", "\n", "\r", "\t"] do
+  #     # else
+  #     # end
+  #     {vm, :end}
+  #   else
+  #     {vm, :end}
+  #   end
+
+  # end
+
+
+  # def read_word_from_string(w, tail) do
+  #   if String.length(tail) > 0 do
+  #     <<ch>> <> rest = tail
+  #     # читаем символ. если он пробел, то ищем слово или возвращаем, если уже есть
+  #     if <<ch>> in [" ", "\n", "\r", "\t"] do
+  #       # если пусто, то еще ничего на считали и продолждаем
+  #       if w=="" do
+  #         read_word_from_string(w, rest)
+  #       # иначе возвращаем слово
+  #       else
+  #         {w, tail}
+  #       end
+  #     else
+  #     # если символ не пробел - добавляем
+  #     read_word_from_string(w <> <<ch>>, rest)
+  #     end
+  #   else
+  #     {w, tail}
+  #   end
+  # end
+
   def read_word(%E4vm{} = vm) do
-    {m, f} = vm.read_word_mfa
-    {_vm, _word} = apply(m, f, [vm])
+    {_next_vm, _word} = do_read_word("", vm)
   end
 
-  def read_word_function(%{read_word_state: read_word_state} = vm) when length(read_word_state)==0 do
-    {vm, :end}
+  def do_read_word(word, vm) do
+    case read_char(vm) do
+      {next_vm, :end} ->
+        if word == "" do
+          {next_vm, :end}
+        # иначе возвращаем слово
+        else
+          {next_vm, word}
+        end
+      {next_vm, char} ->
+        if char in [" ", "\n", "\r", "\t"] do
+          # если пусто, то еще ничего на считали и продолждаем
+          if word == "" do
+            do_read_word(word, next_vm)
+          # иначе возвращаем слово
+          else
+            {next_vm, word}
+          end
+        else
+          # если символ не пробельный - добавляем
+          do_read_word(word <> char, next_vm)
+        end
+    end
   end
 
-  def read_word_function(vm) do
-    [hd|tail] = vm.read_word_state
-    new_vm = %{vm| read_word_state: tail}
-    {new_vm, hd}
+  # берет mfa и выполняет. переключаемая логика.
+  # read_char_mfa модуль функция, которой передается vm. возврат {new_vm, char}
+  # read_char_state использовать для стейта функции чтения. любые данные.
+  def read_char(%E4vm{} = vm) do
+    {m, f} = vm.read_char_mfa
+    {_next_vm, _char} = apply(m, f, [vm])
+  end
+
+  def read_string_char_function(vm) do
+    case string_char_reader(vm.read_char_state) do
+      {:end, _} ->
+        {vm, :end}
+      {char, next_state} ->
+        {%E4vm{vm|read_char_state: next_state}, char}
+    end
+  end
+
+  def string_char_reader(state) do
+    if String.length(state) > 0 do
+      <<char>> <> next_state = state
+      {<<char>>, next_state} # char это строка, но длиной 1 символ!
+    else
+      {:end, state}
+    end
   end
 
   def add_core_word(%E4vm{} = vm, word, handler, immediate) do

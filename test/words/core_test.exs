@@ -337,16 +337,31 @@ defmodule E4vm.Words.CoreTest do
     assert vm.mem[vm.hereP - 1] == E4vm.look_up_word_address(vm, "exit")
   end
 
+  test "read_char test" do
+    vm = E4vm.new()
+    vm = %E4vm{vm | read_char_mfa: {E4vm, :read_string_char_function}, read_char_state: "word"}
+
+    assert {vm, "w"} = E4vm.read_char(vm)
+    assert {vm, "o"} = E4vm.read_char(vm)
+    assert {vm, "r"} = E4vm.read_char(vm)
+    assert {vm, "d"} = E4vm.read_char(vm)
+    assert {_vm, :end} = E4vm.read_char(vm)
+  end
+
   test "read_word test" do
     vm = E4vm.new()
-    vm = %E4vm{vm | read_word_mfa: {CoreTest, :word3}, read_word_state: ["word"]}
+    vm = %E4vm{vm | read_char_mfa: {E4vm, :read_string_char_function}, read_char_state: "1 22 333\r4444\r\n"}
 
-    assert {_vm, "word"} = E4vm.read_word(vm)
+    assert {vm, "1"} = E4vm.read_word(vm)
+    assert {vm, "22"} = E4vm.read_word(vm)
+    assert {vm, "333"} = E4vm.read_word(vm)
+    assert {vm, "4444"} = E4vm.read_word(vm)
+    assert {_vm, :end} = E4vm.read_word(vm)
   end
 
   test "begin_def_word test" do
     vm = E4vm.new()
-    vm = %E4vm{vm | read_word_mfa: {CoreTest, :word3}, read_word_state: ["word"]}
+    vm = %E4vm{vm | read_char_mfa: {E4vm, :read_string_char_function}, read_char_state: "word"}
 
     vm
     |> E4vm.here_to_wp()
@@ -484,26 +499,23 @@ defmodule E4vm.Words.CoreTest do
     assert_receive :hello
   end
 
-    # ' tick
-    test "tick test" do
-      vm = E4vm.new()
-      read_word_state = ["nop"]
-      read_word_mfa = {E4vm, :read_word_function}
+  # ' tick
+  test "tick test" do
+    vm = E4vm.new()
+    new_vm = %E4vm{vm | read_char_mfa: {E4vm, :read_string_char_function}, read_char_state: "nop"}
 
-      new_vm = %E4vm{vm| read_word_state: read_word_state, read_word_mfa: read_word_mfa}
+    vm2 = new_vm
+    |> E4vm.here_to_wp()
+    |> E4vm.add_op_from_string("doList")
+    |> E4vm.add_op_from_string("'")
+    |> E4vm.add_op_from_string("exit")
+    |> E4vm.Words.Core.do_list()
+    |> E4vm.Words.Core.next()
+    # |> E4vm.inspect_core()
 
-      vm2 = new_vm
-      |> E4vm.here_to_wp()
-      |> E4vm.add_op_from_string("doList")
-      |> E4vm.add_op_from_string("'")
-      |> E4vm.add_op_from_string("exit")
-      |> E4vm.Words.Core.do_list()
-      |> E4vm.Words.Core.next()
-      # |> E4vm.inspect_core()
-
-      # должно считать из входного потока слово nop и поместить его адрес(0) в стек ds
-      assert "#Stack<[0]>" == inspect(vm2.ds)
-    end
+    # должно считать из входного потока слово nop и поместить его адрес(0) в стек ds
+    assert "#Stack<[0]>" == inspect(vm2.ds)
+  end
 
   # -----------------------
   def word1() do
@@ -514,13 +526,6 @@ defmodule E4vm.Words.CoreTest do
     "defined_word"
   end
 
-  def word3(vm) do
-    [hd|tail] = vm.read_word_state
-
-    new_vm = %{vm| read_word_state: tail}
-
-    {new_vm, hd}
-  end
 
   def hello(vm) do
     "ip:#{vm.ip} wp:#{vm.wp}" |> IO.inspect(label: ">>>>TEST>>>> hello  ")
