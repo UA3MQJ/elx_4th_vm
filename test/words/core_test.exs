@@ -341,11 +341,22 @@ defmodule E4vm.Words.CoreTest do
     vm = E4vm.new()
     vm = %E4vm{vm | read_char_mfa: {E4vm, :read_string_char_function}, read_char_state: "word"}
 
-    assert {vm, "w"} = E4vm.read_char(vm)
-    assert {vm, "o"} = E4vm.read_char(vm)
-    assert {vm, "r"} = E4vm.read_char(vm)
-    assert {vm, "d"} = E4vm.read_char(vm)
-    assert {_vm, :end} = E4vm.read_char(vm)
+    assert {next_read_char_state, "w"} = E4vm.read_char(vm)
+    vm = Map.merge(vm, %{read_char_state: next_read_char_state})
+    assert {next_read_char_state, "o"} = E4vm.read_char(vm)
+    vm = Map.merge(vm, %{read_char_state: next_read_char_state})
+    assert {next_read_char_state, "r"} = E4vm.read_char(vm)
+    vm = Map.merge(vm, %{read_char_state: next_read_char_state})
+    assert {next_read_char_state, "d"} = E4vm.read_char(vm)
+    vm = Map.merge(vm, %{read_char_state: next_read_char_state})
+    assert {_read_char_state, :end} = E4vm.read_char(vm)
+  end
+
+  test "user_read_char test" do
+    vm = E4vm.new()
+    vm = %E4vm{vm | user_read_char_mfa: {E4vm, :read_string_char_function}, user_read_char_state: "word"}
+
+    assert {"ord", "w"} = E4vm.user_read_char(vm)
   end
 
   test "read_word test" do

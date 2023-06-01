@@ -43,12 +43,13 @@ defmodule E4vm.Words.RW do
   end
 
   def key(%E4vm{} = vm) do
-    # TODO переключение ввода?
-    case E4vm.read_char(vm) do
-      {_vm, :end} ->
+    {new_user_char_state, char} = E4vm.user_read_char(vm)
+    new_vm = %{vm | user_read_char_state: new_user_char_state}
+    case char do
+      :end ->
         Logger.error("read_char error: end of char sequence")
         vm
-      {new_vm, <<char_number>>} ->
+      <<char_number>> ->
         next_ds = new_vm.ds |> Stack.push(char_number)
         %E4vm{new_vm | ds: next_ds}
     end

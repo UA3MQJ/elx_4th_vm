@@ -27,6 +27,9 @@ defmodule E4vm do
             # channel options
             read_char_mfa: nil,        # {m,f}
             read_char_state: nil,
+            # user read char
+            user_read_char_mfa: nil,   # {m,f}
+            user_read_char_state: nil,
             cell_bit_size: 16          # cell - 16 bit
 
 
@@ -161,14 +164,16 @@ defmodule E4vm do
 
   def do_read_word(word, vm) do
     case read_char(vm) do
-      {next_vm, :end} ->
+      {next_char_state, :end} ->
+        next_vm = %{vm| read_char_state: next_char_state}
         if word == "" do
           {next_vm, :end}
         # иначе возвращаем слово
         else
           {next_vm, word}
         end
-      {next_vm, char} ->
+      {next_char_state, char} ->
+        next_vm = %{vm| read_char_state: next_char_state}
         if char in [" ", "\n", "\r", "\t"] do
           # если пусто, то еще ничего на считали и продолждаем
           if word == "" do
@@ -189,17 +194,35 @@ defmodule E4vm do
   # read_char_state использовать для стейта функции чтения. любые данные.
   def read_char(%E4vm{} = vm) do
     {m, f} = vm.read_char_mfa
-    {_next_vm, _char} = apply(m, f, [vm])
+    # {_next_vm, _char} = apply(m, f, [vm])
+    {_next_read_char_state, _char} = apply(m, f, [vm.read_char_state])
   end
 
-  def read_string_char_function(vm) do
-    case string_char_reader(vm.read_char_state) do
+  # берет mfa и выполняет. переключаемая логика.
+  # user_read_char_mfa модуль функция, которой передается vm. возврат {new_vm, char}
+  # user_read_char_state использовать для стейта функции чтения. любые данные.
+  def user_read_char(%E4vm{} = vm) do
+    {m, f} = vm.user_read_char_mfa
+    {_next_user_read_char_state, _char} = apply(m, f, [vm.user_read_char_state])
+  end
+
+  def read_string_char_function(read_char_state) do
+    case string_char_reader(read_char_state) do
       {:end, _} ->
-        {vm, :end}
-      {char, next_state} ->
-        {%E4vm{vm|read_char_state: next_state}, char}
+        {read_char_state, :end}
+      {char, next_char_state} ->
+        {next_char_state, char}
     end
   end
+
+  # def read_string_char_function(vm) do
+  #   case string_char_reader(vm.read_char_state) do
+  #     {:end, _} ->
+  #       {vm, :end}
+  #     {char, next_state} ->
+  #       {%E4vm{vm|read_char_state: next_state}, char}
+  #   end
+  # end
 
   def string_char_reader(state) do
     if String.length(state) > 0 do
